@@ -17,7 +17,6 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import ReaderDashboard from './pages/dashboard/ReaderDashboard';
 import WriterDashboard from './pages/dashboard/WriterDashboard';
-// import AdminLogin from './pages/admin/AdminLogin';
 
 const AppContent = () => {
   const dispatch = useDispatch();
@@ -68,12 +67,6 @@ const AppContent = () => {
             <ResetPassword />
           </PublicRoute>
         } />
-        
-        {/* <Route path="/admin/login" element={
-          <PublicRoute>
-            <AdminLogin />
-          </PublicRoute>
-        } /> */}
 
         {/* Protected Routes */}
         <Route path="/dashboard" element={
