@@ -2,6 +2,7 @@ import { validationResult } from 'express-validator';
 import User from '../models/User.js';
 import sendEmail from '../utils/sendEmail.js';
 import generateToken from '../utils/generateToken.js';
+import jwt from "jsonwebtoken"
 
 // @desc    Register user
 // @route   POST /api/auth/register
