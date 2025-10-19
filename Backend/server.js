@@ -10,6 +10,12 @@ import adminRoutes from './routes/admin.js';
 import userRoutes from './routes/users.js';
 import writerRoutes from './routes/writer.js';
 
+import categoryRoutes from './routes/categories.js';
+import targetAudienceRoutes from './routes/targetAudiences.js';
+import storyRoutes from './routes/stories.js';
+import commentRoutes from './routes/comments.js';
+import fileUpload from 'express-fileupload';
+
 dotenv.config();
 
 const app = express();
@@ -20,6 +26,11 @@ const limiter = rateLimit({
   max: 100 // limit each IP to 100 requests per windowMs
 });
 app.use(limiter);
+
+app.use(fileUpload({
+  useTempFiles: true,
+  tempFileDir: '/tmp/'
+}));
 
 // Middleware
 app.use(cors({
@@ -36,6 +47,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/writer', writerRoutes);
+
+app.use('/api/categories', categoryRoutes);
+app.use('/api/target-audiences', targetAudienceRoutes);
+app.use('/api/stories', storyRoutes);
+app.use('/api/comments', commentRoutes);
 
 // Database connection
 mongoose.connect(process.env.MONGODB_URI)
