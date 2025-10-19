@@ -18,11 +18,19 @@ export const adminLogin = async (req, res) => {
     const { email, password } = req.body;
 
     // Check if user exists and is admin
-    const admin = await User.findOne({ email, role: 'admin' }).select('+password');
+    const admin = await User.findOne({ email }).select('+password');
     if (!admin) {
       return res.status(401).json({
         success: false,
         message: 'Invalid admin credentials'
+      });
+    }
+
+    // Check if user is admin
+    if (admin.role !== 'admin') {
+      return res.status(401).json({
+        success: false,
+        message: 'Not authorized as admin'
       });
     }
 
@@ -99,15 +107,33 @@ export const getUsers = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const role = req.query.role;
+    const search = req.query.search;
     const skip = (page - 1) * limit;
 
-    const users = await User.find()
+    let query = {};
+
+    // Filter by role
+    if (role) {
+      query.role = role;
+    }
+
+    // Search functionality
+    if (search) {
+      query.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const users = await User.find(query)
       .select('-password')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const totalUsers = await User.countDocuments();
+    const totalUsers = await User.countDocuments(query);
     const totalPages = Math.ceil(totalUsers / limit);
 
     res.json({
@@ -163,7 +189,15 @@ export const getUserById = async (req, res) => {
 // @access  Private/Admin
 export const updateUser = async (req, res) => {
   try {
-    const { firstName, lastName, role, isActive, bio } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+
+    const { firstName, lastName, role, isActive } = req.body;
 
     const user = await User.findByIdAndUpdate(
       req.params.id,
@@ -171,8 +205,7 @@ export const updateUser = async (req, res) => {
         firstName,
         lastName,
         role,
-        isActive,
-        bio
+        isActive
       },
       { new: true, runValidators: true }
     ).select('-password');
@@ -253,6 +286,9 @@ export const getDashboardStats = async (req, res) => {
       createdAt: { $gte: sevenDaysAgo }
     });
 
+    // Get total stories (you'll need to import Story model)
+    // const totalStories = await Story.countDocuments();
+
     res.json({
       success: true,
       stats: {
@@ -260,7 +296,9 @@ export const getDashboardStats = async (req, res) => {
         totalWriters,
         totalReaders,
         totalAdmins,
-        recentUsers
+        recentUsers,
+        totalStories: 0, // Placeholder - implement when Story model is available
+        totalComments: 0 // Placeholder
       }
     });
   } catch (error) {

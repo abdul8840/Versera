@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { ADMIN_BASE_URL } from '../../components/others/AdminBaseURL';
 
 export const fetchUsers = createAsyncThunk(
   'user/fetchUsers',

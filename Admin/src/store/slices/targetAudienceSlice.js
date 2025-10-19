@@ -1,15 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { ADMIN_BASE_URL } from '../../components/others/AdminBaseURL';
 
 export const fetchTargetAudiences = createAsyncThunk(
   'targetAudience/fetchTargetAudiences',
   async (_, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${ADMIN_BASE_URL}/api/target-audiences`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(`${ADMIN_BASE_URL}/api/target-audiences`);
 
       const data = await response.json();
 

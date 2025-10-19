@@ -5,12 +5,7 @@ export const fetchCategories = createAsyncThunk(
   'category/fetchCategories',
   async (_, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${ADMIN_BASE_URL}/api/categories`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(`${ADMIN_BASE_URL}/api/categories`);
 
       const data = await response.json();
 
@@ -34,7 +29,9 @@ export const createCategory = createAsyncThunk(
       
       formData.append('name', categoryData.name);
       formData.append('description', categoryData.description);
-      formData.append('image', categoryData.image);
+      if (categoryData.image) {
+        formData.append('image', categoryData.image);
+      }
 
       const response = await fetch(`${ADMIN_BASE_URL}/api/admin/categories`, {
         method: 'POST',

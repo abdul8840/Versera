@@ -16,6 +16,9 @@ import storyRoutes from './routes/stories.js';
 import commentRoutes from './routes/comments.js';
 import fileUpload from 'express-fileupload';
 
+import adminCategoriesRoutes from './routes/adminCategories.js';
+import adminTargetAudiencesRoutes from './routes/adminTargetAudiences.js';
+
 dotenv.config();
 
 const app = express();
@@ -52,6 +55,9 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/target-audiences', targetAudienceRoutes);
 app.use('/api/stories', storyRoutes);
 app.use('/api/comments', commentRoutes);
+
+app.use('/api/admin/categories', adminCategoriesRoutes);
+app.use('/api/admin/target-audiences', adminTargetAudiencesRoutes);
 
 // Database connection
 mongoose.connect(process.env.MONGODB_URI)

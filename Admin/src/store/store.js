@@ -4,6 +4,7 @@ import categoryReducer from './slices/categorySlice';
 import targetAudienceReducer from './slices/targetAudienceSlice';
 import userReducer from './slices/userSlice';
 import storyReducer from './slices/storySlice';
+import dashboardReducer from './slices/dashboardSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     targetAudience: targetAudienceReducer,
     user: userReducer,
     story: storyReducer,
+    dashboard: dashboardReducer,
   },
 });
 
