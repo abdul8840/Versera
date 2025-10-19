@@ -22,7 +22,13 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    process.env.CLIENT_URL, // Client frontend
+    process.env.ADMIN_URL, // Admin frontend
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 // Routes
