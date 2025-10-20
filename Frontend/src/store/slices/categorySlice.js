@@ -1,12 +1,18 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { API_BASE_URL } from '../../components/others/BaseURL';
 
 export const fetchCategories = createAsyncThunk(
   'category/fetchCategories',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('/api/categories');
+      console.log('Fetching categories from:', `${API_BASE_URL}/api/categories`);
+      const response = await fetch(`${API_BASE_URL}/api/categories`);
+      
+      console.log('Categories response status:', response.status);
+      console.log('Categories response ok:', response.ok);
 
       const data = await response.json();
+      console.log('Categories data:', data);
 
       if (!response.ok) {
         return rejectWithValue(data.message || 'Failed to fetch categories');
@@ -14,6 +20,7 @@ export const fetchCategories = createAsyncThunk(
 
       return data;
     } catch (error) {
+      console.error('Categories fetch error:', error);
       return rejectWithValue(error.message);
     }
   }

@@ -69,15 +69,20 @@ export const createCategory = async (req, res) => {
 // @access  Public
 export const getCategories = async (req, res) => {
   try {
+    console.log('Fetching categories from database...');
+    
     const categories = await Category.find({ isActive: true })
       .populate('createdBy', 'firstName lastName')
       .sort({ name: 1 });
+
+    console.log('Found categories:', categories.length);
 
     res.json({
       success: true,
       count: categories.length,
       categories
     });
+
   } catch (error) {
     console.error('Get categories error:', error);
     res.status(500).json({

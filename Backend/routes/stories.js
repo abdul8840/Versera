@@ -32,7 +32,22 @@ router.post('/writer/stories', [
   body('title').notEmpty().withMessage('Story title is required'),
   body('description').notEmpty().withMessage('Story description is required'),
   body('content').notEmpty().withMessage('Story content is required'),
-  body('categories').isArray({ min: 1 }).withMessage('At least one category is required'),
+
+  // --- FIX IS HERE ---
+  body('categories')
+    .custom((value) => {
+      try {
+        const parsedArray = JSON.parse(value);
+        if (!Array.isArray(parsedArray) || parsedArray.length < 1) {
+          throw new Error('At least one category is required.');
+        }
+      } catch (error) {
+        throw new Error('Categories must be a valid JSON array string.');
+      }
+      return true;
+    }),
+  // --- END OF FIX ---
+
   body('targetAudience').notEmpty().withMessage('Target audience is required'),
   body('language').notEmpty().withMessage('Language is required')
 ], createStory);

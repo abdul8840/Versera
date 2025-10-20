@@ -1,10 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { API_BASE_URL } from '../../components/others/BaseURL';
 
 export const fetchStoryComments = createAsyncThunk(
   'comment/fetchStoryComments',
   async ({ storyId, page = 1 }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`/api/comments/stories/${storyId}/comments?page=${page}`);
+      const response = await fetch(`${API_BASE_URL}/api/comments/stories/${storyId}/comments?page=${page}`);
 
       const data = await response.json();
 
@@ -24,7 +25,7 @@ export const createComment = createAsyncThunk(
   async ({ storyId, content, parentComment }, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/comments/stories/${storyId}/comments`, {
+      const response = await fetch(`${API_BASE_URL}/api/comments/stories/${storyId}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,7 +52,7 @@ export const updateComment = createAsyncThunk(
   async ({ commentId, content }, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/comments/${commentId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/comments/${commentId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -78,7 +79,7 @@ export const deleteComment = createAsyncThunk(
   async (commentId, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/comments/${commentId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/comments/${commentId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -103,7 +104,7 @@ export const toggleCommentLike = createAsyncThunk(
   async (commentId, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/comments/${commentId}/like`, {
+      const response = await fetch(`${API_BASE_URL}/api/comments/${commentId}/like`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

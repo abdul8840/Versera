@@ -7,6 +7,8 @@ import cloudinary from '../utils/cloudinary.js';
 // @desc    Create story
 // @route   POST /api/writer/stories
 // @access  Private/Writer
+// In backend/controllers/storyController.js - Update createStory function
+
 export const createStory = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -30,13 +32,29 @@ export const createStory = async (req, res) => {
       status
     } = req.body;
 
+    // Parse JSON fields
+    let categoriesArray = [];
+    let tagsArray = [];
+    let charactersArray = [];
+
+    try {
+      categoriesArray = JSON.parse(categories);
+      tagsArray = JSON.parse(tags);
+      charactersArray = JSON.parse(mainCharacters);
+    } catch (parseError) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid data format for categories, tags, or characters'
+      });
+    }
+
     // Validate categories
     const categoryDocs = await Category.find({ 
-      _id: { $in: categories },
+      _id: { $in: categoriesArray },
       isActive: true 
     });
     
-    if (categoryDocs.length !== categories.length) {
+    if (categoryDocs.length !== categoriesArray.length) {
       return res.status(400).json({
         success: false,
         message: 'One or more categories are invalid'
@@ -82,32 +100,6 @@ export const createStory = async (req, res) => {
       });
     }
 
-    // Parse main characters if provided
-    let charactersArray = [];
-    if (mainCharacters) {
-      try {
-        charactersArray = JSON.parse(mainCharacters);
-      } catch (error) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid main characters format'
-        });
-      }
-    }
-
-    // Parse tags if provided
-    let tagsArray = [];
-    if (tags) {
-      try {
-        tagsArray = JSON.parse(tags);
-      } catch (error) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid tags format'
-        });
-      }
-    }
-
     const story = await Story.create({
       title,
       description,
@@ -121,7 +113,7 @@ export const createStory = async (req, res) => {
         url: bannerImageResult.secure_url
       },
       author: req.user.id,
-      categories,
+      categories: categoriesArray,
       tags: tagsArray,
       mainCharacters: charactersArray,
       targetAudience,
@@ -305,18 +297,30 @@ export const updateStory = async (req, res) => {
 
     // Update categories if provided
     if (categories) {
+      // --- FIX IS HERE ---
+      let categoriesArray;
+      try {
+        categoriesArray = JSON.parse(categories);
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid categories format'
+        });
+      }
+
       const categoryDocs = await Category.find({ 
-        _id: { $in: categories },
+        _id: { $in: categoriesArray }, // Use the parsed array
         isActive: true 
       });
       
-      if (categoryDocs.length !== categories.length) {
+      if (categoryDocs.length !== categoriesArray.length) {
         return res.status(400).json({
           success: false,
           message: 'One or more categories are invalid'
         });
       }
-      story.categories = categories;
+      story.categories = categoriesArray; // Assign the parsed array
+      // --- END OF FIX ---
     }
 
     // Update target audience if provided

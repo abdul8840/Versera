@@ -1,12 +1,18 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { API_BASE_URL } from '../../components/others/BaseURL';
 
 export const fetchTargetAudiences = createAsyncThunk(
   'targetAudience/fetchTargetAudiences',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('/api/target-audiences');
+      console.log('Fetching target audiences from:', '/api/target-audiences');
+      const response = await fetch(`${API_BASE_URL}/api/target-audiences`);
+      
+      console.log('Target audiences response status:', response.status);
+      console.log('Target audiences response ok:', response.ok);
 
       const data = await response.json();
+      console.log('Target audiences data:', data);
 
       if (!response.ok) {
         return rejectWithValue(data.message || 'Failed to fetch target audiences');
@@ -14,6 +20,7 @@ export const fetchTargetAudiences = createAsyncThunk(
 
       return data;
     } catch (error) {
+      console.error('Target audiences fetch error:', error);
       return rejectWithValue(error.message);
     }
   }

@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { API_BASE_URL } from '../../components/others/BaseURL';
 
 export const fetchWriterStories = createAsyncThunk(
   'story/fetchWriterStories',
@@ -6,7 +7,7 @@ export const fetchWriterStories = createAsyncThunk(
     try {
       const token = localStorage.getItem('token');
       const queryString = new URLSearchParams(queryParams).toString();
-      const response = await fetch(`/api/writer/stories?${queryString}`, {
+      const response = await fetch(`${API_BASE_URL}/api/stories/writer/stories?${queryString}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -30,7 +31,7 @@ export const fetchStoryById = createAsyncThunk(
   async (storyId, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/stories/${storyId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/stories/${storyId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -48,33 +49,21 @@ export const fetchStoryById = createAsyncThunk(
     }
   }
 );
-
 export const createStory = createAsyncThunk(
   'story/createStory',
-  async (storyData, { rejectWithValue }) => {
+  async (formData, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const formData = new FormData();
       
-      // Append all fields
-      Object.keys(storyData).forEach(key => {
-        if (key === 'coverImage' || key === 'bannerImage') {
-          if (storyData[key]) {
-            formData.append(key, storyData[key]);
-          }
-        } else if (key === 'categories' || key === 'tags' || key === 'mainCharacters') {
-          formData.append(key, JSON.stringify(storyData[key]));
-        } else {
-          formData.append(key, storyData[key]);
-        }
-      });
-
-      const response = await fetch('/api/writer/stories', {
+      // Note: We're sending FormData directly, no need to set Content-Type header
+      // The browser will set it automatically with the correct boundary
+      const response = await fetch(`${API_BASE_URL}/api/stories/writer/stories`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
+          // Don't set Content-Type when sending FormData - let the browser set it
         },
-        body: formData,
+        body: formData, // Send FormData directly
       });
 
       const data = await response.json();
@@ -95,27 +84,14 @@ export const updateStory = createAsyncThunk(
   async ({ id, storyData }, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const formData = new FormData();
       
-      // Append all fields
-      Object.keys(storyData).forEach(key => {
-        if (key === 'coverImage' || key === 'bannerImage') {
-          if (storyData[key]) {
-            formData.append(key, storyData[key]);
-          }
-        } else if (key === 'categories' || key === 'tags' || key === 'mainCharacters') {
-          formData.append(key, JSON.stringify(storyData[key]));
-        } else {
-          formData.append(key, storyData[key]);
-        }
-      });
-
-      const response = await fetch(`/api/writer/stories/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/stories/writer/stories/${id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
+          // Don't set Content-Type when sending FormData
         },
-        body: formData,
+        body: storyData, // Send FormData directly
       });
 
       const data = await response.json();
@@ -136,7 +112,7 @@ export const deleteStory = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/writer/stories/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/stories/writer/stories/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -161,7 +137,7 @@ export const toggleLike = createAsyncThunk(
   async (storyId, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/stories/${storyId}/like`, {
+      const response = await fetch(`${API_BASE_URL}/api/stories/stories/${storyId}/like`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
