@@ -29,10 +29,12 @@ import EditStory from './pages/writer/EditStory';
 import StoryDetail from './pages/writer/StoryDetail';
 import WriterProfile from './pages/writer/WriterProfile';
 import ReaderProfile from './pages/reader/ReaderProfile';
+import Header from './components/Layout/Header';
 
 function AppContent() {
   return (
     <Router>
+      <Header />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={
