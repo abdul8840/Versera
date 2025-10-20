@@ -17,6 +17,7 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import ReaderDashboard from './pages/dashboard/ReaderDashboard';
 import WriterDashboard from './pages/dashboard/WriterDashboard';
+import Dashboard from './pages/writer/Dashboard';
 
 const AppContent = () => {
   const dispatch = useDispatch();
@@ -77,7 +78,7 @@ const AppContent = () => {
         
         <Route path="/writer/dashboard" element={
           <ProtectedRoute requiredRole="writer">
-            <WriterDashboard />
+            <Dashboard />
           </ProtectedRoute>
         } />
 

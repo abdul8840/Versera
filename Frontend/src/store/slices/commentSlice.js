@@ -1,14 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-export const getStoryComments = createAsyncThunk(
-  'comments/getStoryComments',
+export const fetchStoryComments = createAsyncThunk(
+  'comment/fetchStoryComments',
   async ({ storyId, page = 1 }, { rejectWithValue }) => {
     try {
       const response = await fetch(`/api/comments/stories/${storyId}/comments?page=${page}`);
+
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch comments');
+        return rejectWithValue(data.message || 'Failed to fetch comments');
       }
 
       return data;
@@ -19,15 +20,15 @@ export const getStoryComments = createAsyncThunk(
 );
 
 export const createComment = createAsyncThunk(
-  'comments/createComment',
+  'comment/createComment',
   async ({ storyId, content, parentComment }, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`/api/comments/stories/${storyId}/comments`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ content, parentComment }),
       });
@@ -35,7 +36,7 @@ export const createComment = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to create comment');
+        return rejectWithValue(data.message || 'Failed to create comment');
       }
 
       return data;
@@ -46,15 +47,15 @@ export const createComment = createAsyncThunk(
 );
 
 export const updateComment = createAsyncThunk(
-  'comments/updateComment',
+  'comment/updateComment',
   async ({ commentId, content }, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`/api/comments/${commentId}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ content }),
       });
@@ -62,7 +63,7 @@ export const updateComment = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to update comment');
+        return rejectWithValue(data.message || 'Failed to update comment');
       }
 
       return data;
@@ -73,7 +74,7 @@ export const updateComment = createAsyncThunk(
 );
 
 export const deleteComment = createAsyncThunk(
-  'comments/deleteComment',
+  'comment/deleteComment',
   async (commentId, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
@@ -87,10 +88,10 @@ export const deleteComment = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to delete comment');
+        return rejectWithValue(data.message || 'Failed to delete comment');
       }
 
-      return { commentId, ...data };
+      return { commentId, message: data.message };
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -98,7 +99,7 @@ export const deleteComment = createAsyncThunk(
 );
 
 export const toggleCommentLike = createAsyncThunk(
-  'comments/toggleCommentLike',
+  'comment/toggleCommentLike',
   async (commentId, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
@@ -112,7 +113,7 @@ export const toggleCommentLike = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to toggle comment like');
+        return rejectWithValue(data.message || 'Failed to toggle comment like');
       }
 
       return { commentId, ...data };
@@ -123,13 +124,17 @@ export const toggleCommentLike = createAsyncThunk(
 );
 
 const commentSlice = createSlice({
-  name: 'comments',
+  name: 'comment',
   initialState: {
     comments: [],
     loading: false,
     error: null,
     success: false,
-    pagination: {}
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalComments: 0,
+    },
   },
   reducers: {
     clearError: (state) => {
@@ -138,26 +143,32 @@ const commentSlice = createSlice({
     clearSuccess: (state) => {
       state.success = false;
     },
-    addTempComment: (state, action) => {
+    addComment: (state, action) => {
       state.comments.unshift(action.payload);
     },
-    removeTempComment: (state, action) => {
+    updateCommentLocal: (state, action) => {
+      const index = state.comments.findIndex(comment => comment._id === action.payload._id);
+      if (index !== -1) {
+        state.comments[index] = action.payload;
+      }
+    },
+    removeComment: (state, action) => {
       state.comments = state.comments.filter(comment => comment._id !== action.payload);
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
-      // Get Story Comments
-      .addCase(getStoryComments.pending, (state) => {
+      // Fetch Comments
+      .addCase(fetchStoryComments.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(getStoryComments.fulfilled, (state, action) => {
+      .addCase(fetchStoryComments.fulfilled, (state, action) => {
         state.loading = false;
         state.comments = action.payload.comments;
         state.pagination = action.payload.pagination;
       })
-      .addCase(getStoryComments.rejected, (state, action) => {
+      .addCase(fetchStoryComments.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
@@ -165,6 +176,7 @@ const commentSlice = createSlice({
       .addCase(createComment.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.success = false;
       })
       .addCase(createComment.fulfilled, (state, action) => {
         state.loading = false;
@@ -175,10 +187,12 @@ const commentSlice = createSlice({
             comment => comment._id === action.payload.comment.parentComment
           );
           if (parentIndex !== -1) {
+            if (!state.comments[parentIndex].replies) {
+              state.comments[parentIndex].replies = [];
+            }
             state.comments[parentIndex].replies.push(action.payload.comment);
           }
         } else {
-          // Add as top-level comment
           state.comments.unshift(action.payload.comment);
         }
       })
@@ -188,57 +202,52 @@ const commentSlice = createSlice({
       })
       // Update Comment
       .addCase(updateComment.fulfilled, (state, action) => {
-        const updatedComment = action.payload.comment;
-        // Update in comments array
-        const commentIndex = state.comments.findIndex(
-          comment => comment._id === updatedComment._id
-        );
-        if (commentIndex !== -1) {
-          state.comments[commentIndex] = updatedComment;
-        } else {
-          // Check in replies
-          state.comments.forEach(comment => {
-            const replyIndex = comment.replies.findIndex(
-              reply => reply._id === updatedComment._id
-            );
-            if (replyIndex !== -1) {
-              comment.replies[replyIndex] = updatedComment;
-            }
-          });
+        const index = state.comments.findIndex(comment => comment._id === action.payload.comment._id);
+        if (index !== -1) {
+          state.comments[index] = action.payload.comment;
         }
+        // Also check in replies
+        state.comments.forEach(comment => {
+          if (comment.replies) {
+            const replyIndex = comment.replies.findIndex(reply => reply._id === action.payload.comment._id);
+            if (replyIndex !== -1) {
+              comment.replies[replyIndex] = action.payload.comment;
+            }
+          }
+        });
       })
       // Delete Comment
       .addCase(deleteComment.fulfilled, (state, action) => {
-        state.comments = state.comments.filter(
-          comment => comment._id !== action.payload.commentId
-        );
+        state.comments = state.comments.filter(comment => comment._id !== action.payload.commentId);
+        // Also remove from replies
+        state.comments.forEach(comment => {
+          if (comment.replies) {
+            comment.replies = comment.replies.filter(reply => reply._id !== action.payload.commentId);
+          }
+        });
       })
       // Toggle Comment Like
       .addCase(toggleCommentLike.fulfilled, (state, action) => {
         const { commentId, liked } = action.payload;
-        
-        // Helper function to update likes in comment
-        const updateCommentLikes = (comment) => {
-          if (comment._id === commentId) {
-            if (liked) {
-              comment.likes.push('current-user');
-            } else {
-              comment.likes = comment.likes.filter(like => like !== 'current-user');
+        // Update in main comments
+        const comment = state.comments.find(c => c._id === commentId);
+        if (comment) {
+          comment.isLiked = liked;
+          comment.likesCount = liked ? comment.likesCount + 1 : comment.likesCount - 1;
+        }
+        // Update in replies
+        state.comments.forEach(parentComment => {
+          if (parentComment.replies) {
+            const reply = parentComment.replies.find(r => r._id === commentId);
+            if (reply) {
+              reply.isLiked = liked;
+              reply.likesCount = liked ? reply.likesCount + 1 : reply.likesCount - 1;
             }
           }
-          return comment;
-        };
-
-        // Update in top-level comments
-        state.comments = state.comments.map(updateCommentLikes);
-        
-        // Update in replies
-        state.comments.forEach(comment => {
-          comment.replies = comment.replies.map(updateCommentLikes);
         });
       });
   },
 });
 
-export const { clearError, clearSuccess, addTempComment, removeTempComment } = commentSlice.actions;
+export const { clearError, clearSuccess, addComment, updateCommentLocal, removeComment } = commentSlice.actions;
 export default commentSlice.reducer;
