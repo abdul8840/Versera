@@ -157,6 +157,29 @@ export const toggleLike = createAsyncThunk(
   }
 );
 
+// Add this new function in src/store/slices/storySlice.js
+
+export const fetchStories = createAsyncThunk(
+  'story/fetchStories',
+  async (queryParams = {}, { rejectWithValue }) => {
+    try {
+      // This is a public route, so no token is needed
+      const queryString = new URLSearchParams(queryParams).toString();
+      const response = await fetch(`${API_BASE_URL}/api/stories?${queryString}`);
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || 'Failed to fetch public stories');
+      }
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const storySlice = createSlice({
   name: 'story',
   initialState: {
@@ -261,6 +284,19 @@ const storySlice = createSlice({
         state.stories = state.stories.filter(story => story._id !== action.payload.id);
       })
       .addCase(deleteStory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(fetchStories.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchStories.fulfilled, (state, action) => {
+        state.loading = false;
+        state.stories = action.payload.stories;
+        state.pagination = action.payload.pagination;
+      })
+      .addCase(fetchStories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

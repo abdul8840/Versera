@@ -30,6 +30,8 @@ import StoryDetail from './pages/writer/StoryDetail';
 import WriterProfile from './pages/writer/WriterProfile';
 import ReaderProfile from './pages/reader/ReaderProfile';
 import Header from './components/Layout/Header';
+import AllStories from './pages/AllStories';
+import StoryDetails from './pages/StoryDetails';
 
 function AppContent() {
   return (
@@ -40,6 +42,9 @@ function AppContent() {
         <Route path="/" element={
             <Home />
         } />
+
+        <Route path="/stories" element={<AllStories />} />
+        <Route path="/stories/:id" element={<StoryDetails />} />
 
         <Route path="/register" element={
           <PublicRoute>
