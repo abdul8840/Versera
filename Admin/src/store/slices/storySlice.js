@@ -7,7 +7,7 @@ export const fetchStories = createAsyncThunk(
     try {
       const token = localStorage.getItem('adminToken');
       const queryString = new URLSearchParams(queryParams).toString();
-      const response = await fetch(`${ADMIN_BASE_URL}/api/stories?${queryString}`, {
+      const response = await fetch(`${ADMIN_BASE_URL}/api/admin/stories?${queryString}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -82,6 +82,7 @@ export const deleteStory = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('adminToken');
+      // This URL correctly matches the new backend route
       const response = await fetch(`${ADMIN_BASE_URL}/api/admin/stories/${id}`, {
         method: 'DELETE',
         headers: {

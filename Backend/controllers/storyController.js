@@ -295,9 +295,7 @@ export const updateStory = async (req, res) => {
     if (language) story.language = language;
     if (copyright) story.copyright = copyright;
 
-    // Update categories if provided
     if (categories) {
-      // --- FIX IS HERE ---
       let categoriesArray;
       try {
         categoriesArray = JSON.parse(categories);
@@ -309,7 +307,7 @@ export const updateStory = async (req, res) => {
       }
 
       const categoryDocs = await Category.find({ 
-        _id: { $in: categoriesArray }, // Use the parsed array
+        _id: { $in: categoriesArray },
         isActive: true 
       });
       
@@ -319,8 +317,7 @@ export const updateStory = async (req, res) => {
           message: 'One or more categories are invalid'
         });
       }
-      story.categories = categoriesArray; // Assign the parsed array
-      // --- END OF FIX ---
+      story.categories = categoriesArray;
     }
 
     // Update target audience if provided
@@ -551,6 +548,99 @@ export const toggleLike = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error while toggling like'
+    });
+  }
+};
+
+// ... (keep all your existing functions like createStory, getStories, etc.)
+
+// @desc    Get all stories for Admin
+// @route   GET /api/admin/stories
+// @access  Private/Admin
+export const getAdminStories = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      status, // Admin can filter by any status
+      search
+    } = req.query;
+
+    const skip = (page - 1) * limit;
+    // Admin query doesn't default to 'published'
+    const query = { isActive: true };
+
+    // Apply filters if they exist
+    if (status) query.status = status;
+
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const stories = await Story.find(query)
+      .populate('author', 'firstName lastName')
+      .populate('categories', 'name')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const totalStories = await Story.countDocuments(query);
+
+    res.json({
+      success: true,
+      stories,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalStories / limit),
+        totalStories,
+        hasNext: page < Math.ceil(totalStories / limit),
+        hasPrev: page > 1
+      }
+    });
+
+  } catch (error) {
+    console.error('Get admin stories error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching admin stories'
+    });
+  }
+};
+
+// @desc    Delete a story as an Admin
+// @route   DELETE /api/admin/stories/:id
+// @access  Private/Admin
+export const adminDeleteStory = async (req, res) => {
+  try {
+    const story = await Story.findById(req.params.id);
+
+    if (!story) {
+      return res.status(404).json({
+        success: false,
+        message: 'Story not found'
+      });
+    }
+    if (story.coverImage && story.coverImage.public_id) {
+        await cloudinary.uploader.destroy(story.coverImage.public_id);
+    }
+    if (story.bannerImage && story.bannerImage.public_id) {
+        await cloudinary.uploader.destroy(story.bannerImage.public_id);
+    }
+    await Story.findByIdAndDelete(req.params.id);
+
+    res.json({
+      success: true,
+      message: 'Story deleted successfully by admin'
+    });
+
+  } catch (error) {
+    console.error('Admin delete story error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while deleting story'
     });
   }
 };

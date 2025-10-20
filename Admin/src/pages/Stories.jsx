@@ -17,66 +17,43 @@ import {
   Alert,
   Snackbar,
   IconButton,
-  Button,
 } from '@mui/material';
 import {
   Visibility as ViewIcon,
-  Edit as EditIcon,
   Delete as DeleteIcon,
-  Block as BlockIcon,
 } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
+import {
+  fetchStories,
+  updateStoryStatus,
+  deleteStory,
+  clearError,
+  clearSuccess,
+} from '../store/slices/storySlice'; // Adjust the import path to your slice
 
 const Stories = () => {
-  const [stories, setStories] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  // 1. Connect to the Redux store to get state
+  const dispatch = useDispatch();
+  const { stories, loading, error, success, pagination } = useSelector((state) => state.story);
+
+  // 2. Keep only the filters in local component state
   const [filters, setFilters] = useState({
     page: 1,
     limit: 10,
     status: '',
     search: '',
   });
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-    totalStories: 0,
-  });
-
+  
+  // 3. Dispatch the fetchStories action when filters change
   useEffect(() => {
-    fetchStories();
-  }, [filters]);
-
-  const fetchStories = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('adminToken');
-      const queryParams = new URLSearchParams(filters).toString();
-      const response = await fetch(`/api/stories?${queryParams}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      if (data.success) {
-        setStories(data.stories);
-        setPagination(data.pagination);
-      } else {
-        setError(data.message || 'Failed to fetch stories');
-      }
-    } catch (error) {
-      setError('Error fetching stories');
-    } finally {
-      setLoading(false);
-    }
-  };
+    dispatch(fetchStories(filters));
+  }, [dispatch, filters]);
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({
       ...prev,
       [key]: value,
-      page: 1,
+      page: 1, // Reset to page 1 on any filter change
     }));
   };
 
@@ -84,55 +61,26 @@ const Stories = () => {
     setFilters(prev => ({ ...prev, page: value }));
   };
 
-  const handleStatusChange = async (storyId, newStatus) => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`/api/admin/stories/${storyId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        setSuccess('Story status updated successfully');
-        fetchStories();
-      } else {
-        setError(data.message || 'Failed to update story status');
-      }
-    } catch (error) {
-      setError('Error updating story status');
+  // 4. Dispatch the updateStoryStatus action
+  const handleStatusChange = (storyId, newStatus) => {
+    dispatch(updateStoryStatus({ id: storyId, status: newStatus }));
+  };
+
+  // 5. Dispatch the deleteStory action
+  const handleDelete = (storyId) => {
+    if (window.confirm('Are you sure you want to delete this story? This action cannot be undone.')) {
+      dispatch(deleteStory(storyId));
     }
   };
 
-  const handleDelete = async (storyId) => {
-    if (window.confirm('Are you sure you want to delete this story?')) {
-      try {
-        const token = localStorage.getItem('adminToken');
-        const response = await fetch(`/api/admin/stories/${storyId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        const data = await response.json();
-        if (data.success) {
-          setSuccess('Story deleted successfully');
-          fetchStories();
-        } else {
-          setError(data.message || 'Failed to delete story');
-        }
-      } catch (error) {
-        setError('Error deleting story');
-      }
-    }
-  };
-
+  // 6. Use clearError and clearSuccess actions for the Snackbar
   const handleCloseSnackbar = () => {
-    setError('');
-    setSuccess('');
+    if (error) {
+      dispatch(clearError());
+    }
+    if (success) {
+      dispatch(clearSuccess());
+    }
   };
 
   const getStatusColor = (status) => {
@@ -152,14 +100,16 @@ const Stories = () => {
 
       <Snackbar
         open={!!error || !!success}
-        autoHideDuration={6000}
+        autoHideDuration={4000}
         onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
         <Alert
           onClose={handleCloseSnackbar}
           severity={error ? 'error' : 'success'}
+          sx={{ width: '100%' }}
         >
-          {error || success}
+          {error || (success && 'Action completed successfully!')}
         </Alert>
       </Snackbar>
 
@@ -172,7 +122,7 @@ const Stories = () => {
             size="small"
             value={filters.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
-            sx={{ minWidth: 200 }}
+            sx={{ flexGrow: 1 }}
           />
           <TextField
             select
@@ -181,9 +131,9 @@ const Stories = () => {
             size="small"
             value={filters.status}
             onChange={(e) => handleFilterChange('status', e.target.value)}
-            sx={{ minWidth: 120 }}
+            sx={{ minWidth: 150 }}
           >
-            <MenuItem value="">All</MenuItem>
+            <MenuItem value="">All Statuses</MenuItem>
             <MenuItem value="draft">Draft</MenuItem>
             <MenuItem value="published">Published</MenuItem>
             <MenuItem value="archived">Archived</MenuItem>
@@ -191,8 +141,8 @@ const Stories = () => {
         </Box>
       </Paper>
 
-      {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+      {loading && stories.length === 0 ? (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
           <CircularProgress />
         </Box>
       ) : (
@@ -204,7 +154,6 @@ const Stories = () => {
                   <TableCell>Cover</TableCell>
                   <TableCell>Title</TableCell>
                   <TableCell>Author</TableCell>
-                  <TableCell>Categories</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell>Views</TableCell>
                   <TableCell>Likes</TableCell>
@@ -214,41 +163,24 @@ const Stories = () => {
               </TableHead>
               <TableBody>
                 {stories.map((story) => (
-                  <TableRow key={story._id}>
+                  <TableRow key={story._id} hover>
                     <TableCell>
-                      <img
-                        src={story.coverImage?.url}
+                      <Box
+                        component="img"
+                        src={story.coverImage?.url || 'https://via.placeholder.com/50'}
                         alt={story.title}
-                        style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 4 }}
+                        sx={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 1 }}
                       />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="subtitle2" noWrap sx={{ maxWidth: 200 }}>
+                      <Typography variant="subtitle2" noWrap sx={{ maxWidth: 250 }}>
                         {story.title}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {story.author?.firstName} {story.author?.lastName}
+                        {`${story.author?.firstName || ''} ${story.author?.lastName || 'N/A'}`}
                       </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {story.categories?.slice(0, 2).map((category) => (
-                          <Chip
-                            key={category._id}
-                            label={category.name}
-                            size="small"
-                            variant="outlined"
-                          />
-                        ))}
-                        {story.categories?.length > 2 && (
-                          <Chip
-                            label={`+${story.categories.length - 2}`}
-                            size="small"
-                          />
-                        )}
-                      </Box>
                     </TableCell>
                     <TableCell>
                       <TextField
@@ -256,7 +188,7 @@ const Stories = () => {
                         size="small"
                         value={story.status}
                         onChange={(e) => handleStatusChange(story._id, e.target.value)}
-                        sx={{ minWidth: 100 }}
+                        sx={{ minWidth: 120 }}
                       >
                         <MenuItem value="draft">Draft</MenuItem>
                         <MenuItem value="published">Published</MenuItem>
@@ -266,13 +198,10 @@ const Stories = () => {
                     <TableCell>{story.views}</TableCell>
                     <TableCell>{story.likesCount}</TableCell>
                     <TableCell>
-                      {story.publishedAt ? 
-                        new Date(story.publishedAt).toLocaleDateString() : 
-                        'Not published'
-                      }
+                      {story.publishedAt ? new Date(story.publishedAt).toLocaleDateString() : 'N/A'}
                     </TableCell>
                     <TableCell>
-                      <IconButton color="primary" size="small">
+                      <IconButton color="primary" size="small" /* onClick logic for view */>
                         <ViewIcon />
                       </IconButton>
                       <IconButton 
@@ -287,10 +216,8 @@ const Stories = () => {
                 ))}
                 {stories.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={9} align="center">
-                      <Typography color="textSecondary">
-                        No stories found
-                      </Typography>
+                    <TableCell colSpan={8} align="center">
+                      <Typography color="textSecondary">No stories found</Typography>
                     </TableCell>
                   </TableRow>
                 )}
@@ -298,8 +225,7 @@ const Stories = () => {
             </Table>
           </TableContainer>
 
-          {/* Pagination */}
-          {pagination.totalPages > 1 && (
+          {pagination?.totalPages > 1 && (
             <Box display="flex" justifyContent="center" mt={3}>
               <Pagination
                 count={pagination.totalPages}

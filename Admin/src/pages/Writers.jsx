@@ -33,6 +33,7 @@ import {
   clearError,
   clearSuccess,
 } from '../store/slices/userSlice';
+import { ADMIN_BASE_URL } from '../components/others/AdminBaseURL';
 
 const WriterStoriesDialog = ({ open, onClose, writer }) => {
   const [stories, setStories] = useState([]);
@@ -48,7 +49,7 @@ const WriterStoriesDialog = ({ open, onClose, writer }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`/api/stories?author=${writer._id}`, {
+      const response = await fetch(`${ADMIN_BASE_URL}/api/stories?author=${writer._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
