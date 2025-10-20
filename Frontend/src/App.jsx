@@ -38,9 +38,7 @@ function AppContent() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={
-          <PublicRoute>
             <Home />
-          </PublicRoute>
         } />
 
         <Route path="/register" element={

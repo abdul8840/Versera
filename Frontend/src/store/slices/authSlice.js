@@ -1,14 +1,14 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { API_BASE_URL } from '../../components/others/BaseURL';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { API_BASE_URL } from "../../components/others/BaseURL";
 
 export const registerUser = createAsyncThunk(
-  'auth/register',
+  "auth/register",
   async (userData, { rejectWithValue }) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(userData),
       });
@@ -16,7 +16,7 @@ export const registerUser = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Registration failed');
+        return rejectWithValue(data.message || "Registration failed");
       }
 
       return data;
@@ -27,13 +27,13 @@ export const registerUser = createAsyncThunk(
 );
 
 export const verifyOTP = createAsyncThunk(
-  'auth/verifyOTP',
+  "auth/verifyOTP",
   async ({ email, otp }, { rejectWithValue }) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/verify-otp`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, otp }),
       });
@@ -41,7 +41,7 @@ export const verifyOTP = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'OTP verification failed');
+        return rejectWithValue(data.message || "OTP verification failed");
       }
 
       return data;
@@ -52,13 +52,13 @@ export const verifyOTP = createAsyncThunk(
 );
 
 export const loginUser = createAsyncThunk(
-  'auth/login',
+  "auth/login",
   async ({ email, password }, { rejectWithValue }) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
@@ -66,12 +66,12 @@ export const loginUser = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Login failed');
+        return rejectWithValue(data.message || "Login failed");
       }
 
       if (data.token) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
 
       return data;
@@ -82,20 +82,20 @@ export const loginUser = createAsyncThunk(
 );
 
 export const getMe = createAsyncThunk(
-  'auth/getMe',
+  "auth/getMe",
   async (_, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Failed to get user data');
+        return rejectWithValue(data.message || "Failed to get user data");
       }
 
       return data;
@@ -106,13 +106,13 @@ export const getMe = createAsyncThunk(
 );
 
 export const forgotPassword = createAsyncThunk(
-  'auth/forgotPassword',
+  "auth/forgotPassword",
   async (email, { rejectWithValue }) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email }),
       });
@@ -120,7 +120,7 @@ export const forgotPassword = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Password reset failed');
+        return rejectWithValue(data.message || "Password reset failed");
       }
 
       return data;
@@ -131,21 +131,24 @@ export const forgotPassword = createAsyncThunk(
 );
 
 export const resetPassword = createAsyncThunk(
-  'auth/resetPassword',
+  "auth/resetPassword",
   async ({ token, password }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/reset-password/${token}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password }),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/auth/reset-password/${token}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ password }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Password reset failed');
+        return rejectWithValue(data.message || "Password reset failed");
       }
 
       return data;
@@ -156,15 +159,15 @@ export const resetPassword = createAsyncThunk(
 );
 
 export const updateProfile = createAsyncThunk(
-  'auth/updateProfile',
+  "auth/updateProfile",
   async (profileData, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/api/profile/update`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(profileData),
       });
@@ -172,7 +175,7 @@ export const updateProfile = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Profile update failed');
+        return rejectWithValue(data.message || "Profile update failed");
       }
 
       return data;
@@ -183,25 +186,28 @@ export const updateProfile = createAsyncThunk(
 );
 
 export const uploadAvatar = createAsyncThunk(
-  'auth/uploadAvatar',
+  "auth/uploadAvatar",
   async (file, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const formData = new FormData();
-      formData.append('avatar', file);
+      formData.append("avatar", file);
 
-      const response = await fetch(`${API_BASE_URL}/api/profile/upload-avatar`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/profile/upload-avatar`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Avatar upload failed');
+        return rejectWithValue(data.message || "Avatar upload failed");
       }
 
       return data;
@@ -212,17 +218,17 @@ export const uploadAvatar = createAsyncThunk(
 );
 
 export const uploadCover = createAsyncThunk(
-  'auth/uploadCover',
+  "auth/uploadCover",
   async (file, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const formData = new FormData();
-      formData.append('cover', file);
+      formData.append("cover", file);
 
       const response = await fetch(`${API_BASE_URL}/api/profile/upload-cover`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
@@ -230,7 +236,7 @@ export const uploadCover = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Cover upload failed');
+        return rejectWithValue(data.message || "Cover upload failed");
       }
 
       return data;
@@ -241,16 +247,16 @@ export const uploadCover = createAsyncThunk(
 );
 
 export const getProfile = createAsyncThunk(
-  'auth/getProfile',
+  "auth/getProfile",
   async (userId, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const headers = {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       };
-      
+
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+        headers["Authorization"] = `Bearer ${token}`;
       }
 
       const response = await fetch(`${API_BASE_URL}/api/profile/${userId}`, {
@@ -260,7 +266,7 @@ export const getProfile = createAsyncThunk(
       const data = await response.json();
 
       if (!response.ok) {
-        return rejectWithValue(data.message || 'Failed to get profile');
+        return rejectWithValue(data.message || "Failed to get profile");
       }
 
       return data;
@@ -271,20 +277,21 @@ export const getProfile = createAsyncThunk(
 );
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
+  // Quick fix - change initialState loading to false
   initialState: {
-    user: JSON.parse(localStorage.getItem('user')) || null,
-    token: localStorage.getItem('token'),
-    isAuthenticated: !!localStorage.getItem('token'),
-    loading: false,
+    user: JSON.parse(localStorage.getItem("user")) || null,
+    token: localStorage.getItem("token"),
+    isAuthenticated: !!localStorage.getItem("token"),
+    loading: false, // Set this to false
     error: null,
     success: false,
-    profileUser: null, // Add this for viewing other profiles
+    profileUser: null,
   },
   reducers: {
     logout: (state) => {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
@@ -292,6 +299,7 @@ const authSlice = createSlice({
       state.error = null;
       state.success = false;
       state.profileUser = null;
+      state.initialized = true;
     },
     clearError: (state) => {
       state.error = null;
@@ -300,14 +308,29 @@ const authSlice = createSlice({
       state.success = false;
     },
     initializeAuth: (state) => {
-      // This will be called on app start to initialize auth state
-      const token = localStorage.getItem('token');
-      const user = localStorage.getItem('user');
+      console.log("initializeAuth called");
+      const token = localStorage.getItem("token");
+      const user = localStorage.getItem("user");
+
       if (token && user) {
-        state.token = token;
-        state.user = JSON.parse(user);
-        state.isAuthenticated = true;
+        try {
+          state.token = token;
+          state.user = JSON.parse(user);
+          state.isAuthenticated = true;
+          console.log("Auth initialized - User authenticated");
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+        }
+      } else {
+        console.log("No auth data found in localStorage");
       }
+      state.loading = false; // Ensure loading is false
+      state.initialized = true; // Mark as initialized
+    },
+    setLoading: (state, action) => {
+      state.loading = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -377,8 +400,8 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
       })
       // Forgot Password
       .addCase(forgotPassword.pending, (state) => {
@@ -420,7 +443,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = { ...state.user, ...action.payload.user };
         state.success = true;
-        localStorage.setItem('user', JSON.stringify(state.user));
+        localStorage.setItem("user", JSON.stringify(state.user));
       })
       .addCase(updateProfile.rejected, (state, action) => {
         state.loading = false;
@@ -437,7 +460,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user.profilePicture = action.payload.profilePicture;
         state.success = true;
-        localStorage.setItem('user', JSON.stringify(state.user));
+        localStorage.setItem("user", JSON.stringify(state.user));
       })
       .addCase(uploadAvatar.rejected, (state, action) => {
         state.loading = false;
@@ -454,7 +477,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user.coverPicture = action.payload.coverPicture;
         state.success = true;
-        localStorage.setItem('user', JSON.stringify(state.user));
+        localStorage.setItem("user", JSON.stringify(state.user));
       })
       .addCase(uploadCover.rejected, (state, action) => {
         state.loading = false;
@@ -479,5 +502,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError, clearSuccess, initializeAuth } = authSlice.actions;
+export const { logout, clearError, clearSuccess, initializeAuth } =
+  authSlice.actions;
 export default authSlice.reducer;
