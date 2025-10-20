@@ -1,39 +1,58 @@
+// models/User.js
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
-    required: [true, 'First name is required'],
-    trim: true,
-    maxlength: 50
+    required: true,
+    trim: true
   },
   lastName: {
     type: String,
-    required: [true, 'Last name is required'],
-    trim: true,
-    maxlength: 50
+    required: true,
+    trim: true
   },
   email: {
     type: String,
-    required: [true, 'Email is required'],
+    required: true,
     unique: true,
-    lowercase: true,
-    trim: true
+    lowercase: true
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
+    required: true,
     minlength: 6
   },
   dateOfBirth: {
-    type: Date,
-    required: [true, 'Date of birth is required']
+    type: Date
   },
   role: {
     type: String,
     enum: ['reader', 'writer', 'admin'],
     default: 'reader'
+  },
+  bio: {
+    type: String,
+    maxlength: 500
+  },
+  profilePicture: {
+    type: String,
+    default: ''
+  },
+  coverPicture: {
+    type: String,
+    default: ''
+  },
+  socialLinks: {
+    website: String,
+    twitter: String,
+    facebook: String,
+    instagram: String,
+    linkedin: String
+  },
+  location: {
+    type: String
   },
   isVerified: {
     type: Boolean,
@@ -45,39 +64,20 @@ const userSchema = new mongoose.Schema({
   },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
-  bio: {
-    type: String,
-    maxlength: 500,
-    default: ''
-  },
-  profilePicture: {
-    type: String,
-    default: ''
-  },
-  isActive: {
-    type: Boolean,
-    default: true
+  stats: {
+    articlesCount: { type: Number, default: 0 },
+    followersCount: { type: Number, default: 0 },
+    followingCount: { type: Number, default: 0 }
   }
 }, {
   timestamps: true
 });
 
-// Hash password before saving
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    next();
-  }
-  
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-});
-
-// Compare password method
+// Add methods to userSchema
 userSchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Generate OTP
 userSchema.methods.generateOTP = function() {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   this.otp = {
@@ -86,5 +86,13 @@ userSchema.methods.generateOTP = function() {
   };
   return otp;
 };
+
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) {
+    next();
+  }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
 
 export default mongoose.model('User', userSchema);

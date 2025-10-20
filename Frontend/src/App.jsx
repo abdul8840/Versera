@@ -25,6 +25,7 @@ import StoriesList from './pages/writer/StoriesList';
 import CreateStory from './pages/writer/CreateStory';
 import EditStory from './pages/writer/EditStory';
 import StoryDetail from './pages/writer/StoryDetail';
+import WriterProfile from './pages/writer/WriterProfile';
 
 function App() {
   return (
@@ -100,6 +101,17 @@ function App() {
             </ProtectedRoute>
           } />
           
+          <Route path="/writer/stories/:id" element={
+            <ProtectedRoute requiredRole="writer">
+              <StoryDetail />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/writer/profile" element={
+            <ProtectedRoute requiredRole="writer">
+              <WriterProfile />
+            </ProtectedRoute>
+          } />
           <Route path="/writer/stories/:id" element={
             <ProtectedRoute requiredRole="writer">
               <StoryDetail />

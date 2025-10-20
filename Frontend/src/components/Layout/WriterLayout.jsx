@@ -1,3 +1,4 @@
+// components/Layout/WriterLayout.jsx
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
@@ -9,6 +10,8 @@ const WriterLayout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  console.log('WriterLayout - User:', user); // Debug log
+
   const handleLogout = () => {
     dispatch(logout());
     navigate('/');
@@ -17,6 +20,17 @@ const WriterLayout = ({ children }) => {
   const isActive = (path) => {
     return location.pathname === path ? 'bg-primary-100 text-primary-600' : 'text-gray-700';
   };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p>Loading writer layout...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
