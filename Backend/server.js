@@ -17,6 +17,7 @@ import targetAudienceRoutes from './routes/targetAudiences.js';
 import storyRoutes from './routes/stories.js';
 import commentRoutes from './routes/comments.js';
 import myListRoutes from './routes/myListRoutes.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
 
 import adminStoryRoutes from './routes/adminStories.js';
 import adminCategoriesRoutes from './routes/adminCategories.js';
@@ -68,6 +69,7 @@ app.use('/api/target-audiences', targetAudienceRoutes);
 app.use('/api/stories', storyRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/my-list', myListRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.use('/api/admin/stories', adminStoryRoutes);
 app.use('/api/admin/categories', adminCategoriesRoutes);

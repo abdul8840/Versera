@@ -90,11 +90,7 @@ function AppContent() {
           </ProtectedRoute>
         } />
 
-        <Route path="/my-list" element={
-            <ProtectedRoute>
-              <MyListPage />
-            </ProtectedRoute>
-        } />
+        <Route path="/my-list" element={<ProtectedRoute><MyListPage /></ProtectedRoute>} />
 
         {/* Writer Routes */}
         <Route path="/writer/dashboard" element={

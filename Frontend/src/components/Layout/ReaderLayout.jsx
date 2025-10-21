@@ -34,7 +34,7 @@ const ReaderLayout = ({ children }) => {
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl !mx-auto !px-4 sm:!px-6 lg:!px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <Link to="/dashboard" className="flex items-center">
@@ -42,7 +42,7 @@ const ReaderLayout = ({ children }) => {
               </Link>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center !space-x-4">
               <Link 
                 to="/stories" 
                 className="text-gray-700 hover:text-green-600 transition font-medium"
@@ -63,39 +63,39 @@ const ReaderLayout = ({ children }) => {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <div className="max-w-7xl !mx-auto !py-6 sm:!px-6 lg:!px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="flex">
             {/* Sidebar */}
-            <div className="w-64 bg-white rounded-lg shadow-sm p-6 mr-6">
-              <nav className="space-y-2">
+            <div className="w-64 bg-white rounded-lg shadow-sm !p-6 !mr-6">
+              <nav className="!space-y-2">
                 <Link
                   to="/dashboard"
-                  className={`block px-4 py-2 rounded-md transition font-medium ${isActive('/dashboard')}`}
+                  className={`block !px-4 !py-2 rounded-md transition font-medium ${isActive('/dashboard')}`}
                 >
                   📊 Dashboard
                 </Link>
                 <Link
-                  to="/favorites"
-                  className={`block px-4 py-2 rounded-md transition font-medium ${isActive('/favorites')}`}
+                  to="/my-list"
+                  className={`block !px-4 !py-2 rounded-md transition font-medium ${isActive('/favorites')}`}
                 >
                   ❤️ My Favorites
                 </Link>
                 <Link
                   to="/following"
-                  className={`block px-4 py-2 rounded-md transition font-medium ${isActive('/following')}`}
+                  className={`block !px-4 !py-2 rounded-md transition font-medium ${isActive('/following')}`}
                 >
                   👥 Following
                 </Link>
                 <Link
                   to="/reading-history"
-                  className={`block px-4 py-2 rounded-md transition font-medium ${isActive('/reading-history')}`}
+                  className={`block !px-4 !py-2 rounded-md transition font-medium ${isActive('/reading-history')}`}
                 >
                   📚 Reading History
                 </Link>
                 <Link
                   to="/reader/profile"
-                  className={`block px-4 py-2 rounded-md transition font-medium ${isActive('/reader/profile')}`}
+                  className={`block !px-4 !py-2 rounded-md transition font-medium ${isActive('/reader/profile')}`}
                 >
                   👤 Profile
                 </Link>

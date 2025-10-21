@@ -74,6 +74,11 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Story'
   }],
+
+  following: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User' // Refers to other users (writers)
+  }],
 }, {
   timestamps: true
 });

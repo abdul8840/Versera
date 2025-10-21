@@ -6,6 +6,7 @@ import categoryReducer from './slices/categorySlice';
 import targetAudienceReducer from './slices/targetAudienceSlice';
 import commentReducer from './slices/commentSlice';
 import myListReducer from './slices/myListSlice';
+import dashboardReducer from './slices/dashboardSlice';
 
 export const store = configureStore({
   reducer: {
@@ -15,5 +16,6 @@ export const store = configureStore({
     targetAudience: targetAudienceReducer,
     comment: commentReducer,
     myList: myListReducer,
+    dashboard: dashboardReducer,
   },
 });
