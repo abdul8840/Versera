@@ -25,7 +25,7 @@ const WriterLayout = ({ children }) => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 !mx-auto !mb-4"></div>
           <p>Loading writer layout...</p>
         </div>
       </div>
@@ -36,7 +36,7 @@ const WriterLayout = ({ children }) => {
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl !mx-auto !px-4 sm:!px-6 lg:!px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <Link to="/writer/dashboard" className="flex items-center">
@@ -44,13 +44,13 @@ const WriterLayout = ({ children }) => {
               </Link>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center !space-x-4">
               <span className="text-gray-700">
                 Welcome, {user?.firstName} {user?.lastName}
               </span>
               <button
                 onClick={handleLogout}
-                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
+                className="bg-red-600 text-white !px-4 !py-2 rounded-md hover:bg-red-700 transition"
               >
                 Logout
               </button>
@@ -59,39 +59,39 @@ const WriterLayout = ({ children }) => {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      <div className="max-w-7xl !mx-auto !py-6 sm:!px-6 lg:!px-8">
+        <div className="!px-4 !py-6 sm:!px-0">
           <div className="flex">
             {/* Sidebar */}
-            <div className="w-64 bg-white rounded-lg shadow-sm p-6 mr-6">
+            <div className="w-64 bg-white rounded-lg shadow-sm !p-6 !mr-6">
               <nav className="space-y-2">
                 <Link
                   to="/writer/dashboard"
-                  className={`block px-4 py-2 rounded-md transition ${isActive('/writer/dashboard')}`}
+                  className={`block !px-4 !py-2 rounded-md transition ${isActive('/writer/dashboard')}`}
                 >
                   Dashboard
                 </Link>
                 <Link
                   to="/writer/stories"
-                  className={`block px-4 py-2 rounded-md transition ${isActive('/writer/stories')}`}
+                  className={`block !px-4 !py-2 rounded-md transition ${isActive('/writer/stories')}`}
                 >
                   My Stories
                 </Link>
                 <Link
                   to="/writer/stories/create"
-                  className={`block px-4 py-2 rounded-md transition ${isActive('/writer/stories/create')}`}
+                  className={`block !px-4 !py-2 rounded-md transition ${isActive('/writer/stories/create')}`}
                 >
                   Create Story
                 </Link>
                 <Link
                   to="/writer/analytics"
-                  className={`block px-4 py-2 rounded-md transition ${isActive('/writer/analytics')}`}
+                  className={`block !px-4 !py-2 rounded-md transition ${isActive('/writer/analytics')}`}
                 >
                   Analytics
                 </Link>
                 <Link
                   to="/writer/profile"
-                  className={`block px-4 py-2 rounded-md transition ${isActive('/writer/profile')}`}
+                  className={`block !px-4 !py-2 rounded-md transition ${isActive('/writer/profile')}`}
                 >
                   Profile
                 </Link>
