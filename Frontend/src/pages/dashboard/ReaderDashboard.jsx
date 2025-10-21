@@ -264,7 +264,7 @@ const ReaderDashboard = () => {
             </Link>
             
             <Link
-              to="/favorites"
+              to="/my-list"
               className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-200 rounded-lg hover:border-red-300 hover:bg-red-50 transition-colors group"
             >
               <span className="text-2xl mb-2 group-hover:scale-110 transition-transform">❤️</span>

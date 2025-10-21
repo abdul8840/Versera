@@ -1,35 +1,38 @@
 import React, { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify'; 
 
 // Import all necessary actions and components
 import { fetchStoryById, clearCurrentStory, toggleLike } from '../store/slices/storySlice'; 
+import { fetchMyList, toggleStoryInList } from '../store/slices/myListSlice';
 import StoryCard from '../components/Story/StoryCard';
 import CommentList from '../components/Comment/CommentList';
-
-// Optional: for notifications when user is not logged in
-import { toast } from 'react-toastify'; 
 
 const StoryDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Get state from Redux
-  const { user } = useSelector((state) => state.auth); // Get auth user
+  // Get state from Redux store
+  const { user } = useSelector((state) => state.auth);
   const { currentStory: story, loading, error } = useSelector((state) => state.story);
-  const { stories: allStories } = useSelector((state) => state.story);
+  const { stories: allStories } = useSelector((state) => state.story); // For related stories
+  const { stories: myList, loading: myListLoading } = useSelector((state) => state.myList);
 
-  // Fetch story on mount, clear on unmount
+  // Fetch story and user's "My List" on mount
   useEffect(() => {
     if (id) {
       dispatch(fetchStoryById(id));
+    }
+    if (user) {
+      dispatch(fetchMyList());
     }
     // Cleanup on unmount
     return () => {
       dispatch(clearCurrentStory());
     };
-  }, [id, dispatch]);
+  }, [id, dispatch, user]);
 
   // --- Action Handlers ---
 
@@ -48,17 +51,23 @@ const StoryDetails = () => {
       navigate('/login');
       return;
     }
-    // TODO: Dispatch your "add to list" thunk here
-    // dispatch(addStoryToMyList(story._id));
-    toast.success('Story added to your list (functionality pending).');
+    // Dispatch the toggle action and show toast on success/error
+    dispatch(toggleStoryInList(story._id))
+      .unwrap()
+      .then((payload) => {
+        toast.success(payload.message); // Show success message from backend
+      })
+      .catch((err) => {
+        toast.error(err);
+      });
   };
 
   // --- Loading/Error States ---
 
-  if (loading) {
+  if (loading || (user && myListLoading)) {
     return (
       <div className="flex justify-center items-center h-screen">
-        Loading..
+        Loading...
       </div>
     );
   }
@@ -71,20 +80,19 @@ const StoryDetails = () => {
     return <p className="text-center text-gray-500 mt-10">Story not found.</p>;
   }
 
-  // --- Derived State ---
+  // --- Derived State (checks if user has liked/saved) ---
 
-  // Simple logic for related stories
   const relatedStories = allStories
     .filter(s => s._id !== story._id && s.categories.some(cat => story.categories.find(sc => sc._id === cat._id)))
     .slice(0, 4);
 
-  // Check if the current user has liked this story
   const isLiked = user && story.likes.includes(user._id);
+  const isSaved = myList.some((savedStory) => savedStory._id === story._id);
 
   return (
     <div className="bg-gray-50">
       {/* Banner Image */}
-      <div className="w-full h-64 md:h-96 bg-cover bg-center" style={{ backgroundImage: `url(${story.bannerImage?.url})` }}>
+      <div className="w-full h-64 md:h-96 bg-cover bg-center" style={{ backgroundImage: `url(${story.bannerImage.url})` }}>
         <div className="bg-black bg-opacity-50 w-full h-full"></div>
       </div>
       
@@ -106,10 +114,14 @@ const StoryDetails = () => {
               </button>
               <button
                 onClick={handleAddToList}
-                className="flex items-center justify-center space-x-2 py-2 px-3 rounded-lg font-semibold bg-white text-blue-600 border border-blue-600 hover:bg-blue-50 transition-colors"
+                className={`flex items-center justify-center space-x-2 py-2 px-3 rounded-lg font-semibold transition-colors ${
+                  isSaved
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-50'
+                }`}
               >
-                <i className="fas fa-plus"></i>
-                <span>Save</span>
+                <i className={`fas ${isSaved ? 'fa-check' : 'fa-plus'}`}></i>
+                <span>{isSaved ? 'Saved' : 'Save'}</span>
               </button>
             </div>
             {/* -------------------- */}
@@ -150,7 +162,7 @@ const StoryDetails = () => {
           </div>
         </aside>
 
-        {/* Right Column: Story Content & Author */}
+        {/* Right Column: Story Content, Author, & Comments */}
         <main className="md:w-2/3 lg:w-3/4 mt-8 md:mt-0">
           {/* Story Content */}
           <div className="bg-white p-6 md:p-8 rounded-lg shadow-sm">
@@ -168,7 +180,7 @@ const StoryDetails = () => {
             <div>
               <h4 className="text-lg font-semibold">About {story.author.firstName} {story.author.lastName}</h4>
               <p className="text-gray-600 mt-1">{story.author.bio || 'No bio available.'}</p>
-              {/* <Link to={`/authors/${story.author._id}`} className="text-indigo-600 hover:text-indigo-800 mt-2 inline-block">View Profile</Link> */}
+              {/* You could add a link to the author's public profile page here */}
             </div>
           </div>
           

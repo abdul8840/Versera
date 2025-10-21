@@ -68,7 +68,12 @@ const userSchema = new mongoose.Schema({
     articlesCount: { type: Number, default: 0 },
     followersCount: { type: Number, default: 0 },
     followingCount: { type: Number, default: 0 }
-  }
+  },
+
+  myList: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Story'
+  }],
 }, {
   timestamps: true
 });

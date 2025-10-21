@@ -16,8 +16,9 @@ import categoryRoutes from './routes/categories.js';
 import targetAudienceRoutes from './routes/targetAudiences.js';
 import storyRoutes from './routes/stories.js';
 import commentRoutes from './routes/comments.js';
-import adminStoryRoutes from './routes/adminStories.js';
+import myListRoutes from './routes/myListRoutes.js';
 
+import adminStoryRoutes from './routes/adminStories.js';
 import adminCategoriesRoutes from './routes/adminCategories.js';
 import adminTargetAudiencesRoutes from './routes/adminTargetAudiences.js';
 
@@ -50,6 +51,7 @@ app.use(cors({
   origin: [
     process.env.CLIENT_URL, // Client frontend
     process.env.ADMIN_URL, // Admin frontend
+    "http://localhost:5173"
   ],
   credentials: true
 }));
@@ -65,8 +67,9 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/target-audiences', targetAudienceRoutes);
 app.use('/api/stories', storyRoutes);
 app.use('/api/comments', commentRoutes);
-app.use('/api/admin/stories', adminStoryRoutes);
+app.use('/api/my-list', myListRoutes);
 
+app.use('/api/admin/stories', adminStoryRoutes);
 app.use('/api/admin/categories', adminCategoriesRoutes);
 app.use('/api/admin/target-audiences', adminTargetAudiencesRoutes);
 

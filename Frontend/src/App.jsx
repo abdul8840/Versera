@@ -32,6 +32,7 @@ import ReaderProfile from './pages/reader/ReaderProfile';
 import Header from './components/Layout/Header';
 import AllStories from './pages/AllStories';
 import StoryDetails from './pages/StoryDetails';
+import MyListPage from './pages/MyListPage';
 
 function AppContent() {
   return (
@@ -87,6 +88,12 @@ function AppContent() {
           <ProtectedRoute>
             <ReaderProfile />
           </ProtectedRoute>
+        } />
+
+        <Route path="/my-list" element={
+            <ProtectedRoute>
+              <MyListPage />
+            </ProtectedRoute>
         } />
 
         {/* Writer Routes */}
