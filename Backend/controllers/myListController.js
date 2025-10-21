@@ -49,7 +49,6 @@ export const toggleStoryInList = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Toggle "My List" error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
@@ -57,27 +56,66 @@ export const toggleStoryInList = async (req, res) => {
 // @desc    Get all stories in the user's "My List"
 // @route   GET /api/my-list
 // @access  Private
+// export const getMyList = async (req, res) => {
+//   try {
+//     const user = await User.findById(req.user.id).populate({
+//       path: 'myList',
+//       populate: [
+//         { path: 'author', select: 'firstName lastName profilePicture' },
+//         { path: 'categories', select: 'name' }
+//       ]
+//     });
+
+//     if (!user) {
+//       return res.status(404).json({ success: false, message: 'User not found' });
+//     }
+
+//     res.json({
+//       success: true,
+//       stories: user.myList
+//     });
+
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: 'Server error' });
+//   }
+// };
+
+// In backend/controllers/myListController.js
+
 export const getMyList = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate({
+    const userWithList = await User.findById(req.user.id).populate({
       path: 'myList',
       populate: [
         { path: 'author', select: 'firstName lastName profilePicture' },
-        { path: 'categories', select: 'name' }
+        { path: 'categories', select: 'name' },
+        // Keep populating likes to get the array
+        { path: 'likes', select: '_id' } 
       ]
     });
 
-    if (!user) {
+    if (!userWithList) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+    // --- Process the stories to format the likes array ---
+    const processedStories = userWithList.myList.map(story => {
+      const storyObj = story.toObject(); // Convert Mongoose doc to plain object
+      return {
+        ...storyObj,
+        likesCount: storyObj.likes?.length || 0, // Ensure likesCount is present
+        // **Convert likes from [{_id: '...'}, ...] to ['...', '...']**
+        likes: storyObj.likes?.map(like => like._id.toString()) || [], 
+      };
+    });
+    // ----------------------------------------------------
+
     res.json({
       success: true,
-      stories: user.myList
+      stories: processedStories // Send the processed list
     });
 
   } catch (error) {
-    console.error('Get "My List" error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };

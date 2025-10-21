@@ -29,10 +29,20 @@ dotenv.config();
 
 const app = express();
 
+// Middleware
+app.use(cors({
+  origin: [
+    process.env.CLIENT_URL, // Client frontend
+    process.env.ADMIN_URL, // Admin frontend
+    "http://localhost:5173"
+  ],
+  credentials: true
+}));
+
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 500 // limit each IP to 100 requests per windowMs
 });
 app.use(limiter);
 
@@ -46,16 +56,6 @@ app.use(fileUpload({
 // Increase payload size limit for file uploads
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
-// Middleware
-app.use(cors({
-  origin: [
-    process.env.CLIENT_URL, // Client frontend
-    process.env.ADMIN_URL, // Admin frontend
-    "http://localhost:5173"
-  ],
-  credentials: true
-}));
 
 // Routes
 app.use('/api/auth', authRoutes);

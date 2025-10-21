@@ -66,7 +66,6 @@ export const adminLogin = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Admin login error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error during admin login'
@@ -92,7 +91,6 @@ export const getAdminProfile = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get admin profile error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching admin profile'
@@ -149,7 +147,6 @@ export const getUsers = async (req, res) => {
       users
     });
   } catch (error) {
-    console.error('Get users error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching users'
@@ -176,7 +173,6 @@ export const getUserById = async (req, res) => {
       user
     });
   } catch (error) {
-    console.error('Get user error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching user'
@@ -223,7 +219,6 @@ export const updateUser = async (req, res) => {
       user
     });
   } catch (error) {
-    console.error('Update user error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while updating user'
@@ -260,7 +255,6 @@ export const deleteUser = async (req, res) => {
       message: 'User deleted successfully'
     });
   } catch (error) {
-    console.error('Delete user error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while deleting user'
@@ -302,7 +296,6 @@ export const getDashboardStats = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get dashboard stats error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching dashboard stats'

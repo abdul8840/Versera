@@ -15,40 +15,61 @@ const WriterLayout = ({ children }) => {
     navigate('/');
   };
 
+
   const isActive = (path) => {
-    return location.pathname === path ? 'bg-primary-100 text-primary-600' : 'text-gray-700';
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
+
+  // Define sidebar links with icons and paths
+  const sidebarLinks = [
+    { name: 'Dashboard', path: '/writer/dashboard', icon: '📊' },
+    { name: 'My Stories', path: '/writer/stories', icon: '📚' },
+    { name: 'Create Story', path: '/writer/stories/create', icon: '➕' },
+    { name: 'Analytics', path: '/writer/analytics', icon: '📈' }, // Note: This route isn't in App.jsx yet
+    { name: 'Profile', path: '/writer/profile', icon: '👤' },
+    { name: 'My List', path: '/my-list', icon: '❤️' }, // Added My List page
+  ];
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 !mx-auto !mb-4"></div>
-          <p>Loading writer layout...</p>
+          Loading..
+          <p className="!mt-4 text-gray-600">Loading writer layout...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* Navigation Bar */}
+      <nav className="bg-white shadow-md border-b border-gray-200 sticky top-0 z-30">
         <div className="max-w-7xl !mx-auto !px-4 sm:!px-6 lg:!px-8">
           <div className="flex justify-between h-16">
+            {/* Logo/Brand */}
             <div className="flex items-center">
-              <Link to="/writer/dashboard" className="flex items-center">
-                <span className="text-xl font-bold text-primary-600">Versera Writer</span>
+              <Link to="/writer/dashboard" className="flex items-center !space-x-2">
+                {/* You can add a logo image here */}
+                <span className="text-2xl font-bold text-blue-600">✍️ Versera Writer</span>
               </Link>
             </div>
             
+            {/* User Info & Logout */}
             <div className="flex items-center !space-x-4">
-              <span className="text-gray-700">
-                Welcome, {user?.firstName} {user?.lastName}
-              </span>
+              <div className="flex items-center !space-x-2">
+                 <img 
+                   src={user.profilePicture || '/default-avatar.png'} 
+                   alt="Profile" 
+                   className="w-8 h-8 rounded-full object-cover border border-gray-300"
+                 />
+                 <span className="text-gray-800 font-medium hidden sm:inline">
+                   {user?.firstName} {user?.lastName}
+                 </span>
+              </div>
               <button
                 onClick={handleLogout}
-                className="bg-red-600 text-white !px-4 !py-2 rounded-md hover:bg-red-700 transition"
+                className="bg-red-500 text-white !px-4 !py-2 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition font-medium text-sm"
               >
                 Logout
               </button>
@@ -57,51 +78,33 @@ const WriterLayout = ({ children }) => {
         </div>
       </nav>
 
-      <div className="max-w-7xl !mx-auto !py-6 sm:!px-6 lg:!px-8">
-        <div className="!px-4 !py-6 sm:!px-0">
-          <div className="flex">
-            {/* Sidebar */}
-            <div className="w-64 bg-white rounded-lg shadow-sm !p-6 !mr-6">
-              <nav className="space-y-2">
-                <Link
-                  to="/writer/dashboard"
-                  className={`block !px-4 !py-2 rounded-md transition ${isActive('/writer/dashboard')}`}
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  to="/writer/stories"
-                  className={`block !px-4 !py-2 rounded-md transition ${isActive('/writer/stories')}`}
-                >
-                  My Stories
-                </Link>
-                <Link
-                  to="/writer/stories/create"
-                  className={`block !px-4 !py-2 rounded-md transition ${isActive('/writer/stories/create')}`}
-                >
-                  Create Story
-                </Link>
-                <Link
-                  to="/writer/analytics"
-                  className={`block !px-4 !py-2 rounded-md transition ${isActive('/writer/analytics')}`}
-                >
-                  Analytics
-                </Link>
-                <Link
-                  to="/writer/profile"
-                  className={`block !px-4 !py-2 rounded-md transition ${isActive('/writer/profile')}`}
-                >
-                  Profile
-                </Link>
-              </nav>
-            </div>
+      {/* Main Content Area with Sidebar */}
+      <div className="flex flex-1 max-w-7xl !mx-auto w-full !py-6 sm:!px-6 lg:!px-8">
+        {/* Sidebar */}
+        <aside className="w-64 bg-white rounded-lg shadow-md !p-4 !mr-6 flex-shrink-0 self-start sticky top-20"> {/* Made sidebar sticky */}
+          <nav className="!space-y-1">
+            {sidebarLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                className={`flex items-center !space-x-3 !px-4 !py-3 rounded-lg transition font-medium ${
+                  isActive(link.path)
+                    ? 'bg-blue-100 text-blue-700' // Active state styles
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' // Inactive state styles
+                }`}
+              >
+                <span className="text-lg">{link.icon}</span> 
+                <span>{link.name}</span>
+              </Link>
+            ))}
+          </nav>
+        </aside>
 
-            {/* Main Content */}
-            <div className="flex-1">
-              {children}
-            </div>
-          </div>
-        </div>
+        {/* Main Content Area */}
+        <main className="flex-1 bg-white rounded-lg shadow-md min-h-[calc(100vh-10rem)]"> {/* Ensure content area takes space */}
+           {/* We add padding inside the children now */}
+           {children}
+        </main>
       </div>
     </div>
   );
