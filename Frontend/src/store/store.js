@@ -12,6 +12,6 @@ export const store = configureStore({
     story: storyReducer,
     category: categoryReducer,
     targetAudience: targetAudienceReducer,
-    comments: commentReducer,
+    comment: commentReducer,
   },
 });

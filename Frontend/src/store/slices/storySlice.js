@@ -137,7 +137,8 @@ export const toggleLike = createAsyncThunk(
   async (storyId, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/api/stories/stories/${storyId}/like`, {
+      // --- THIS URL IS NOW FIXED ---
+      const response = await fetch(`${API_BASE_URL}/api/stories/${storyId}/like`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -150,14 +151,13 @@ export const toggleLike = createAsyncThunk(
         return rejectWithValue(data.message || 'Failed to toggle like');
       }
 
-      return { storyId, ...data };
+      // Return the storyId and the new like status/count from the server
+      return { storyId, ...data }; 
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
-
-// Add this new function in src/store/slices/storySlice.js
 
 export const fetchStories = createAsyncThunk(
   'story/fetchStories',
