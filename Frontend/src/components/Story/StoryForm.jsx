@@ -254,88 +254,88 @@ const StoryForm = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">
+    <div className="max-w-6xl !mx-auto !p-4 sm:!p-6 lg:!p-8">
+      <div className="bg-white rounded-lg shadow-sm !p-6">
+        <h1 className="text-3xl font-bold text-gray-900 !mb-6">
           {id ? 'Edit Story' : 'Create New Story'}
         </h1>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          <div className="bg-red-100 border border-red-400 text-red-700 !px-4 !py-3 rounded !mb-6">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="!space-y-8">
           {/* Cover & Banner Images */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Cover Image */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Cover Image *</label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+              <label className="block text-sm font-medium text-gray-700 !mb-2">Cover Image *</label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg !p-4 text-center">
                 {coverPreview ? (
-                  <div className="space-y-2">
-                    <img src={coverPreview} alt="Cover preview" className="mx-auto h-32 object-cover rounded"/>
+                  <div className="!space-y-2">
+                    <img src={coverPreview} alt="Cover preview" className="!mx-auto h-32 object-cover rounded"/>
                     <button type="button" onClick={() => removeImage('cover')} className="text-red-600 text-sm hover:text-red-800">Remove Image</button>
                   </div>
                 ) : (
                   <div>
-                    <div className="mt-2">
+                    <div className="!mt-2">
                       <label htmlFor="cover-upload" className="cursor-pointer">
                         <span className="text-indigo-600 hover:text-indigo-500">Upload a file</span>
                         <input id="cover-upload" type="file" className="hidden" accept="image/*" onChange={(e) => handleImageChange(e, 'cover')} disabled={imageLoading} />
                       </label>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 5MB</p>
+                    <p className="text-xs text-gray-500 !mt-1">PNG, JPG, GIF up to 5MB</p>
                   </div>
                 )}
-                {imageLoading && <div className="mt-2 text-xs text-gray-500">Uploading...</div>}
+                {imageLoading && <div className="!mt-2 text-xs text-gray-500">Uploading...</div>}
               </div>
             </div>
             {/* Banner Image */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Banner Image *</label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+              <label className="block text-sm font-medium text-gray-700 !mb-2">Banner Image *</label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg !p-4 text-center">
                 {bannerPreview ? (
-                  <div className="space-y-2">
-                    <img src={bannerPreview} alt="Banner preview" className="mx-auto h-32 object-cover rounded"/>
+                  <div className="!space-y-2">
+                    <img src={bannerPreview} alt="Banner preview" className="!mx-auto h-32 object-cover rounded"/>
                     <button type="button" onClick={() => removeImage('banner')} className="text-red-600 text-sm hover:text-red-800">Remove Image</button>
                   </div>
                 ) : (
                   <div>
-                    <div className="mt-2">
+                    <div className="!mt-2">
                       <label htmlFor="banner-upload" className="cursor-pointer">
                         <span className="text-indigo-600 hover:text-indigo-500">Upload a file</span>
                         <input id="banner-upload" type="file" className="hidden" accept="image/*" onChange={(e) => handleImageChange(e, 'banner')} disabled={imageLoading} />
                       </label>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 5MB</p>
+                    <p className="text-xs text-gray-500 !mt-1">PNG, JPG, GIF up to 5MB</p>
                   </div>
                 )}
-                {imageLoading && <div className="mt-2 text-xs text-gray-500">Uploading...</div>}
+                {imageLoading && <div className="!mt-2 text-xs text-gray-500">Uploading...</div>}
               </div>
             </div>
           </div>
 
           {/* Basic Information */}
-          <div className="space-y-6">
+          <div className="!space-y-6">
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700">Story Title *</label>
-              <input type="text" id="title" name="title" value={formData.title} onChange={handleInputChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter your story title" required/>
+              <input type="text" id="title" name="title" value={formData.title} onChange={handleInputChange} className="!mt-1 block w-full border border-gray-300 rounded-md shadow-sm !p-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter your story title" required/>
             </div>
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description *</label>
-              <textarea id="description" name="description" rows={3} value={formData.description} onChange={handleInputChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="A brief description of your story..." required></textarea>
+              <textarea id="description" name="description" rows={3} value={formData.description} onChange={handleInputChange} className="!mt-1 block w-full border border-gray-300 rounded-md shadow-sm !p-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="A brief description of your story..." required></textarea>
             </div>
           </div>
 
           {/* Categories */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Categories *</label>
+            <label className="block text-sm font-medium text-gray-700 !mb-2">Categories *</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {categories.map((category) => (
-                <label key={category._id} className="flex items-center space-x-2">
-                  <input type="checkbox" checked={formData.categories.includes(category._id)} onChange={() => handleCategoryChange(category._id)} className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"/>
+                <label key={category._id} className="flex items-center !space-x-2 cursor-pointer">
+                  <input type="checkbox" checked={formData.categories.includes(category._id)} onChange={() => handleCategoryChange(category._id)} className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"/>
                   <span className="text-sm text-gray-700">{category.name}</span>
                 </label>
               ))}
@@ -344,41 +344,41 @@ const StoryForm = () => {
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
-            <div className="flex flex-wrap gap-2 mb-2">
+            <label className="block text-sm font-medium text-gray-700 !mb-2">Tags</label>
+            <div className="flex flex-wrap gap-2 !mb-2">
               {formData.tags.map((tag, index) => (
-                <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                <span key={index} className="inline-flex items-center !px-3 !py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
                   {tag}
-                  <button type="button" onClick={() => handleTagRemove(tag)} className="ml-1.5 text-indigo-600 hover:text-indigo-800">&times;</button>
+                  <button type="button" onClick={() => handleTagRemove(tag)} className="!ml-1.5 text-indigo-600 hover:text-indigo-800">&times;</button>
                 </span>
               ))}
             </div>
-            <div className="flex space-x-2">
-              <input type="text" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyPress={handleTagKeyPress} placeholder="Add a tag and press Enter..." className="flex-1 border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"/>
-              <button type="button" onClick={handleTagAdd} className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">Add</button>
+            <div className="flex !space-x-2">
+              <input type="text" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyPress={handleTagKeyPress} placeholder="Add a tag and press Enter..." className="flex-1 border border-gray-300 rounded-md shadow-sm !p-2 focus:ring-indigo-500 focus:border-indigo-500"/>
+              <button type="button" onClick={handleTagAdd} className="bg-gray-200 text-gray-700 !px-4 !py-2 rounded-md hover:bg-gray-300 cursor-pointer">Add</button>
             </div>
           </div>
 
           {/* Main Characters */}
           <div>
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between items-center !mb-2">
               <label className="block text-sm font-medium text-gray-700">Main Characters</label>
-              <button type="button" onClick={addCharacter} className="text-sm text-indigo-600 hover:text-indigo-700">+ Add Character</button>
+              <button type="button" onClick={addCharacter} className="text-sm text-indigo-600 hover:text-indigo-700 cursor-pointer">+ Add Character</button>
             </div>
-            <div className="space-y-4">
+            <div className="!space-y-4">
               {formData.mainCharacters.map((character, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border rounded-lg">
+                <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 !p-4 border rounded-lg">
                   <div className="md:col-span-4">
                     <label className="block text-xs font-medium text-gray-500">Name</label>
-                    <input type="text" value={character.name} onChange={(e) => handleCharacterChange(index, 'name', e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm" placeholder="Character name"/>
+                    <input type="text" value={character.name} onChange={(e) => handleCharacterChange(index, 'name', e.target.value)} className="!mt-1 block w-full border border-gray-300 rounded-md shadow-sm !p-2 text-sm" placeholder="Character name"/>
                   </div>
                   <div className="md:col-span-5">
                     <label className="block text-xs font-medium text-gray-500">Description</label>
-                    <input type="text" value={character.description} onChange={(e) => handleCharacterChange(index, 'description', e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm" placeholder="Character description"/>
+                    <input type="text" value={character.description} onChange={(e) => handleCharacterChange(index, 'description', e.target.value)} className="!mt-1 block w-full border border-gray-300 rounded-md shadow-sm !p-2 text-sm" placeholder="Character description"/>
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-xs font-medium text-gray-500">Role</label>
-                    <select value={character.role} onChange={(e) => handleCharacterChange(index, 'role', e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm">
+                    <select value={character.role} onChange={(e) => handleCharacterChange(index, 'role', e.target.value)} className="!mt-1 block w-full border border-gray-300 rounded-md shadow-sm !p-2 text-sm cursor-pointer">
                       <option value="protagonist">Protagonist</option>
                       <option value="antagonist">Antagonist</option>
                       <option value="supporting">Supporting</option>
@@ -399,37 +399,34 @@ const StoryForm = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label htmlFor="targetAudience" className="block text-sm font-medium text-gray-700">Target Audience *</label>
-              <select id="targetAudience" name="targetAudience" value={formData.targetAudience} onChange={handleInputChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+              <select id="targetAudience" name="targetAudience" value={formData.targetAudience} onChange={handleInputChange} className="!mt-1 block w-full border border-gray-300 rounded-md shadow-sm !p-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer" required>
                 <option value="">Select target audience</option>
                 {targetAudiences.map((audience) => (
-                  <option key={audience._id} value={audience._id}>{audience.title} ({audience.minAge}+)</option>
+                  <option key={audience._id} className='cursor-pointer' value={audience._id}>{audience.title} ({audience.minAge}+)</option>
                 ))}
               </select>
             </div>
             <div>
               <label htmlFor="language" className="block text-sm font-medium text-gray-700">Language *</label>
-              <select id="language" name="language" value={formData.language} onChange={handleInputChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500" required>
-                <option value="English">English</option>
-                <option value="Spanish">Spanish</option>
-                <option value="French">French</option>
-                <option value="German">German</option>
-                <option value="Hindi">Hindi</option>
-                <option value="Other">Other</option>
+              <select id="language" name="language" value={formData.language} onChange={handleInputChange} className="!mt-1 block w-full border border-gray-300 rounded-md shadow-sm !p-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer" required>
+                <option className='cursor-pointer' value="English">English</option>
+                <option className='cursor-pointer' value="Hindi">Hindi</option>
+                <option className='cursor-pointer' value="Other">Other</option>
               </select>
             </div>
             <div>
               <label htmlFor="copyright" className="block text-sm font-medium text-gray-700">Copyright</label>
-              <select id="copyright" name="copyright" value={formData.copyright} onChange={handleInputChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500">
-                <option value="all-rights-reserved">All Rights Reserved</option>
-                <option value="creative-commons">Creative Commons</option>
-                <option value="public-domain">Public Domain</option>
+              <select id="copyright" name="copyright" value={formData.copyright} onChange={handleInputChange} className="!mt-1 block w-full border border-gray-300 rounded-md shadow-sm !p-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <option className='cursor-pointer' value="all-rights-reserved">All Rights Reserved</option>
+                <option className='cursor-pointer' value="creative-commons">Creative Commons</option>
+                <option className='cursor-pointer' value="public-domain">Public Domain</option>
               </select>
             </div>
           </div>
 
           {/* Story Content */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Story Content *</label>
+            <label className="block text-sm font-medium text-gray-700 !mb-2">Story Content *</label>
             <TiptapEditor
               content={formData.content}
               onChange={handleContentChange}
@@ -438,17 +435,17 @@ const StoryForm = () => {
           </div>
 
           {/* Status and Actions */}
-          <div className="flex justify-between items-center pt-6 border-t">
+          <div className="flex justify-between items-center !pt-6 border-t">
             <div>
               <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
-              <select id="status" name="status" value={formData.status} onChange={handleInputChange} className="mt-1 border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500">
+              <select id="status" name="status" value={formData.status} onChange={handleInputChange} className="!mt-1 border border-gray-300 rounded-md shadow-sm !p-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer">
                 <option value="draft">Draft</option>
                 <option value="published">Publish</option>
               </select>
             </div>
-            <div className="space-x-4">
-              <button type="button" onClick={() => navigate('/writer/stories')} className="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300">Cancel</button>
-              <button type="submit" disabled={loading || imageLoading} className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+            <div className="!space-x-4">
+              <button type="button" onClick={() => navigate('/writer/stories')} className="bg-gray-200 text-gray-700 !px-6 !py-2 rounded-md hover:bg-gray-300 cursor-pointer">Cancel</button>
+              <button type="submit" disabled={loading || imageLoading} className="bg-indigo-600 text-white !px-6 !py-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
                 {loading ? 'Saving...' : id ? 'Update Story' : 'Create Story'}
               </button>
             </div>

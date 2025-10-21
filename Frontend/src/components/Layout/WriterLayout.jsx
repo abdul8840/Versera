@@ -10,8 +10,6 @@ const WriterLayout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log('WriterLayout - User:', user); // Debug log
-
   const handleLogout = () => {
     dispatch(logout());
     navigate('/');

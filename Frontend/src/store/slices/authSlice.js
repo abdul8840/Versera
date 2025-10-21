@@ -308,7 +308,6 @@ const authSlice = createSlice({
       state.success = false;
     },
     initializeAuth: (state) => {
-      console.log("initializeAuth called");
       const token = localStorage.getItem("token");
       const user = localStorage.getItem("user");
 
@@ -317,14 +316,11 @@ const authSlice = createSlice({
           state.token = token;
           state.user = JSON.parse(user);
           state.isAuthenticated = true;
-          console.log("Auth initialized - User authenticated");
         } catch (error) {
-          console.error("Error parsing user data:", error);
           localStorage.removeItem("token");
           localStorage.removeItem("user");
         }
       } else {
-        console.log("No auth data found in localStorage");
       }
       state.loading = false; // Ensure loading is false
       state.initialized = true; // Mark as initialized
