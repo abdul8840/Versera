@@ -48,7 +48,7 @@ const StoriesList = () => {
 
   return (
     <WriterLayout>
-      <div className="!space-y-6">
+      <div className="!space-y-6 !p-12">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>

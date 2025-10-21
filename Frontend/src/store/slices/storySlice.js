@@ -303,14 +303,15 @@ const storySlice = createSlice({
       // Toggle Like
       .addCase(toggleLike.fulfilled, (state, action) => {
         const { storyId, liked, likesCount } = action.payload;
-        const story = state.stories.find(s => s._id === storyId);
-        if (story) {
-          story.likesCount = likesCount;
-          story.isLiked = liked;
-        }
+        
         if (state.currentStory && state.currentStory._id === storyId) {
           state.currentStory.likesCount = likesCount;
-          state.currentStory.isLiked = liked;
+          state.currentStory.isLikedByCurrentUser = liked;
+        }
+        const listIndex = state.stories.findIndex(s => s._id === storyId);
+        if (listIndex !== -1) {
+             state.stories[listIndex].likesCount = likesCount;
+             state.stories[listIndex].isLikedByCurrentUser = liked;
         }
       });
   },
