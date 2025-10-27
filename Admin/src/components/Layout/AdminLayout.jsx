@@ -73,6 +73,7 @@ const AdminLayout = ({ children }) => {
           <ListItem
             button
             key={item.text}
+            className='cursor-pointer'
             selected={location.pathname === item.path}
             onClick={() => handleMenuClick(item.path)}
           >
