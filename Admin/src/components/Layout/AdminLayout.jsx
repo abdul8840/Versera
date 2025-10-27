@@ -26,6 +26,7 @@ import {
   SupervisorAccount as AdminUsersIcon,
   RateReview as AudienceIcon, 
   EditNote as WriterIcon,
+  // User as AdminIcon
 } from '@mui/icons-material';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -40,6 +41,7 @@ const menuItems = [
   { text: 'Stories', icon: <BookIcon />, path: '/admin/stories' },
   { text: 'Categories', icon: <CategoryIcon />, path: '/admin/categories' },
   { text: 'Target Audience', icon: <AudienceIcon />, path: '/admin/target-audience' }, 
+  { text: 'Admin Profile', icon: <AdminUsersIcon />, path: '/admin/admin-profile' }, 
 ];
 
 const AdminLayout = ({ children }) => {

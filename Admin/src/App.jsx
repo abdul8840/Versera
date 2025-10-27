@@ -17,6 +17,7 @@ import Categories from './pages/category/Categories';
 import TargetAudience from './pages/targetAudiance/TargetAudience';
 import Stories from './pages/Stories';
 import Writers from './pages/Writers';
+import AdminProfile from './pages/AdminProfile';
 
 const theme = createTheme({
   palette: {
@@ -49,6 +50,7 @@ function App() {
                       <Route path="stories" element={<Stories />} />
                       <Route path="categories" element={<Categories />} />
                       <Route path="target-audience" element={<TargetAudience />} />
+                      <Route path="admin-profile" element={<AdminProfile />} />
                       <Route path="*" element={<Navigate to="/admin/dashboard" />} />
                     </Routes>
                   </AdminLayout>
