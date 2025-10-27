@@ -53,13 +53,10 @@ export const createTargetAudience = async (req, res) => {
 
 export const getTargetAudiences = async (req, res) => {
   try {
-    console.log('Fetching target audiences from database...');
     
     const targetAudiences = await TargetAudience.find({ isActive: true })
       .populate('createdBy', 'firstName lastName')
       .sort({ minAge: 1 });
-
-    console.log('Found target audiences:', targetAudiences.length);
 
     res.json({
       success: true,
