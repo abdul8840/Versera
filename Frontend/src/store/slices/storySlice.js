@@ -30,12 +30,8 @@ export const fetchStoryById = createAsyncThunk(
   'story/fetchStoryById',
   async (storyId, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/api/stories/${storyId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      // Remove token for public story access to prevent view increment on refresh
+      const response = await fetch(`${API_BASE_URL}/api/stories/${storyId}`);
 
       const data = await response.json();
 
@@ -49,21 +45,40 @@ export const fetchStoryById = createAsyncThunk(
     }
   }
 );
+
+export const incrementStoryView = createAsyncThunk(
+  'story/incrementStoryView',
+  async (storyId, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/stories/${storyId}/view`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || 'Failed to increment view');
+      }
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 export const createStory = createAsyncThunk(
   'story/createStory',
   async (formData, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
       
-      // Note: We're sending FormData directly, no need to set Content-Type header
-      // The browser will set it automatically with the correct boundary
       const response = await fetch(`${API_BASE_URL}/api/stories/writer/stories`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          // Don't set Content-Type when sending FormData - let the browser set it
         },
-        body: formData, // Send FormData directly
+        body: formData,
       });
 
       const data = await response.json();
@@ -89,9 +104,8 @@ export const updateStory = createAsyncThunk(
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
-          // Don't set Content-Type when sending FormData
         },
-        body: storyData, // Send FormData directly
+        body: storyData,
       });
 
       const data = await response.json();
@@ -134,10 +148,9 @@ export const deleteStory = createAsyncThunk(
 
 export const toggleLike = createAsyncThunk(
   'story/toggleLike',
-  async (storyId, { rejectWithValue }) => {
+  async (storyId, { rejectWithValue, getState }) => {
     try {
       const token = localStorage.getItem('token');
-      // --- THIS URL IS NOW FIXED ---
       const response = await fetch(`${API_BASE_URL}/api/stories/${storyId}/like`, {
         method: 'POST',
         headers: {
@@ -151,8 +164,14 @@ export const toggleLike = createAsyncThunk(
         return rejectWithValue(data.message || 'Failed to toggle like');
       }
 
-      // Return the storyId and the new like status/count from the server
-      return { storyId, ...data }; 
+      // Store like status in localStorage for persistence
+      if (data.liked) {
+        localStorage.setItem(`liked_${storyId}`, 'true');
+      } else {
+        localStorage.removeItem(`liked_${storyId}`);
+      }
+
+      return { storyId, ...data };
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -163,7 +182,6 @@ export const fetchStories = createAsyncThunk(
   'story/fetchStories',
   async (queryParams = {}, { rejectWithValue }) => {
     try {
-      // This is a public route, so no token is needed
       const queryString = new URLSearchParams(queryParams).toString();
       const response = await fetch(`${API_BASE_URL}/api/stories?${queryString}`);
 
@@ -188,6 +206,7 @@ const storySlice = createSlice({
     loading: false,
     error: null,
     success: false,
+    viewIncremented: false, // Track if view has been incremented for current story
     pagination: {
       currentPage: 1,
       totalPages: 1,
@@ -205,6 +224,24 @@ const storySlice = createSlice({
     },
     clearCurrentStory: (state) => {
       state.currentStory = null;
+      state.viewIncremented = false;
+    },
+    setViewIncremented: (state, action) => {
+      state.viewIncremented = action.payload;
+    },
+    // New reducer to check and set like status from localStorage
+    initializeLikeStatus: (state, action) => {
+      const { storyId } = action.payload;
+      const isLiked = localStorage.getItem(`liked_${storyId}`) === 'true';
+      
+      if (state.currentStory && state.currentStory._id === storyId) {
+        state.currentStory.isLikedByCurrentUser = isLiked;
+      }
+      
+      const storyIndex = state.stories.findIndex(story => story._id === storyId);
+      if (storyIndex !== -1) {
+        state.stories[storyIndex].isLikedByCurrentUser = isLiked;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -216,7 +253,10 @@ const storySlice = createSlice({
       })
       .addCase(fetchWriterStories.fulfilled, (state, action) => {
         state.loading = false;
-        state.stories = action.payload.stories;
+        state.stories = action.payload.stories.map(story => ({
+          ...story,
+          isLikedByCurrentUser: localStorage.getItem(`liked_${story._id}`) === 'true'
+        }));
         state.pagination = action.payload.pagination;
       })
       .addCase(fetchWriterStories.rejected, (state, action) => {
@@ -230,11 +270,21 @@ const storySlice = createSlice({
       })
       .addCase(fetchStoryById.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentStory = action.payload.story;
+        state.currentStory = {
+          ...action.payload.story,
+          isLikedByCurrentUser: localStorage.getItem(`liked_${action.payload.story._id}`) === 'true'
+        };
       })
       .addCase(fetchStoryById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // Increment Story View
+      .addCase(incrementStoryView.fulfilled, (state, action) => {
+        state.viewIncremented = true;
+        if (state.currentStory && state.currentStory._id === action.payload.story._id) {
+          state.currentStory.views = action.payload.story.views;
+        }
       })
       // Create Story
       .addCase(createStory.pending, (state) => {
@@ -293,7 +343,10 @@ const storySlice = createSlice({
       })
       .addCase(fetchStories.fulfilled, (state, action) => {
         state.loading = false;
-        state.stories = action.payload.stories;
+        state.stories = action.payload.stories.map(story => ({
+          ...story,
+          isLikedByCurrentUser: localStorage.getItem(`liked_${story._id}`) === 'true'
+        }));
         state.pagination = action.payload.pagination;
       })
       .addCase(fetchStories.rejected, (state, action) => {
@@ -310,12 +363,12 @@ const storySlice = createSlice({
         }
         const listIndex = state.stories.findIndex(s => s._id === storyId);
         if (listIndex !== -1) {
-             state.stories[listIndex].likesCount = likesCount;
-             state.stories[listIndex].isLikedByCurrentUser = liked;
+          state.stories[listIndex].likesCount = likesCount;
+          state.stories[listIndex].isLikedByCurrentUser = liked;
         }
       });
   },
 });
 
-export const { clearError, clearSuccess, clearCurrentStory } = storySlice.actions;
+export const { clearError, clearSuccess, clearCurrentStory, setViewIncremented, initializeLikeStatus } = storySlice.actions;
 export default storySlice.reducer;

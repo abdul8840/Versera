@@ -26,7 +26,7 @@ export const fetchMyList = createAsyncThunk(
 
 export const toggleStoryInList = createAsyncThunk(
   'myList/toggleStoryInList',
-  async (storyId, { rejectWithValue }) => {
+  async (storyId, { rejectWithValue, getState }) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -40,6 +40,20 @@ export const toggleStoryInList = createAsyncThunk(
       if (!response.ok) {
         return rejectWithValue(data.message || 'Failed to update your list');
       }
+      
+      // Store in localStorage for persistence
+      if (data.added) {
+        const currentList = JSON.parse(localStorage.getItem('myList') || '[]');
+        if (!currentList.includes(storyId)) {
+          currentList.push(storyId);
+          localStorage.setItem('myList', JSON.stringify(currentList));
+        }
+      } else {
+        const currentList = JSON.parse(localStorage.getItem('myList') || '[]');
+        const updatedList = currentList.filter(id => id !== storyId);
+        localStorage.setItem('myList', JSON.stringify(updatedList));
+      }
+      
       return { storyId, added: data.added, message: data.message };
     } catch (error) {
       return rejectWithValue(error.message || 'Network error');
@@ -56,34 +70,51 @@ const myListSlice = createSlice({
   },
 
   reducers: {
-
     clearMyList: (state) => {
-        state.stories = [];
-        state.loading = false;
-        state.error = null;
+      state.stories = [];
+      state.loading = false;
+      state.error = null;
+      localStorage.removeItem('myList');
+    },
+    initializeMyList: (state, action) => {
+      // Initialize from localStorage if available
+      const storedList = JSON.parse(localStorage.getItem('myList') || '[]');
+      state.stories = state.stories.filter(story => 
+        storedList.includes(story._id)
+      );
+    },
+    removeStoryFromList: (state, action) => {
+      const storyId = action.payload;
+      state.stories = state.stories.filter(story => story?._id !== storyId);
+      
+      // Update localStorage
+      const currentList = JSON.parse(localStorage.getItem('myList') || '[]');
+      const updatedList = currentList.filter(id => id !== storyId);
+      localStorage.setItem('myList', JSON.stringify(updatedList));
     }
   },
 
   extraReducers: (builder) => {
     builder
-
       .addCase(fetchMyList.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchMyList.fulfilled, (state, action) => {
         state.loading = false;
-
         state.stories = action.payload.map(story => ({
-            ...story,
-            likes: story.likes || [], 
+          ...story,
+          likes: story.likes || [],
         }));
+        
+        // Sync with localStorage
+        const myListIds = action.payload.map(story => story._id);
+        localStorage.setItem('myList', JSON.stringify(myListIds));
       })
       .addCase(fetchMyList.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload; 
       })
-
       .addCase(toggleStoryInList.fulfilled, (state, action) => {
         const { storyId, added } = action.payload;
         if (!added) {
@@ -93,7 +124,7 @@ const myListSlice = createSlice({
       })
       .addCase(toggleStoryInList.rejected, (state, action) => {
         state.error = action.payload;
-       })
+      })
       .addCase(toggleLike.fulfilled, (state, action) => {
         const { storyId, liked, likesCount } = action.payload; 
         const storyIndex = state.stories.findIndex(story => story?._id === storyId);
@@ -106,6 +137,6 @@ const myListSlice = createSlice({
   },
 });
 
-export const { clearMyList } = myListSlice.actions;
+export const { clearMyList, initializeMyList, removeStoryFromList } = myListSlice.actions;
 
 export default myListSlice.reducer;

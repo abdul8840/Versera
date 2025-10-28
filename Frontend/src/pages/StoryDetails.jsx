@@ -4,8 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { FaHeart, FaRegHeart, FaBookmark, FaRegBookmark, FaUserCircle, FaEye, FaCalendarAlt, FaBookOpen, FaTags, FaShare, FaReadme } from 'react-icons/fa';
 
-import { fetchStoryById, clearCurrentStory, toggleLike } from '../store/slices/storySlice';
-import { fetchMyList, toggleStoryInList } from '../store/slices/myListSlice';
+import { fetchStoryById, clearCurrentStory, toggleLike, incrementStoryView, setViewIncremented, initializeLikeStatus } from '../store/slices/storySlice';
+import { fetchMyList, toggleStoryInList, removeStoryFromList } from '../store/slices/myListSlice';
 import CommentList from '../components/Comment/CommentList';
 import StoryPosterCard from '../components/Story/StoryPosterCard';
 
@@ -15,17 +15,31 @@ const StoryDetails = () => {
   const navigate = useNavigate();
 
   const { user } = useSelector((state) => state.auth);
-  const { currentStory: story, loading, error } = useSelector((state) => state.story);
+  const { currentStory: story, loading, error, viewIncremented } = useSelector((state) => state.story);
   const { stories: allStories } = useSelector((state) => state.story);
   const { stories: myList, loading: myListLoading } = useSelector((state) => state.myList);
 
   useEffect(() => {
     if (id) {
-      dispatch(fetchStoryById(id));
+      // First fetch the story without incrementing view
+      dispatch(fetchStoryById(id)).then((result) => {
+        if (result.payload && result.payload.story) {
+          // Initialize like status from localStorage
+          dispatch(initializeLikeStatus({ storyId: id }));
+          
+          // Increment view only once per session
+          if (!viewIncremented) {
+            dispatch(incrementStoryView(id));
+            dispatch(setViewIncremented(true));
+          }
+        }
+      });
     }
+    
     if (user) {
       dispatch(fetchMyList());
     }
+    
     return () => {
       dispatch(clearCurrentStory());
     };
@@ -48,7 +62,13 @@ const StoryDetails = () => {
     }
     dispatch(toggleStoryInList(story._id))
       .unwrap()
-      .then((payload) => toast.success(payload.message))
+      .then((payload) => {
+        toast.success(payload.message);
+        // If removed from list, update local state immediately
+        if (!payload.added) {
+          dispatch(removeStoryFromList(story._id));
+        }
+      })
       .catch((err) => toast.error(err));
   };
 
@@ -120,8 +140,10 @@ const StoryDetails = () => {
     .filter(s => s && story && s._id !== story._id && s.categories?.some(cat => story.categories?.find(sc => sc._id === cat._id)))
     .slice(0, 4);
 
-  const isLiked = story.isLikedByCurrentUser === true;
-  const isSaved = myList.some((savedStory) => savedStory?._id === story._id);
+  // Check like status from both Redux state and localStorage for persistence
+  const isLiked = story.isLikedByCurrentUser === true || localStorage.getItem(`liked_${story._id}`) === 'true';
+  const isSaved = myList.some((savedStory) => savedStory?._id === story._id) || 
+                 JSON.parse(localStorage.getItem('myList') || '[]').includes(story._id);
 
   const publishedDate = story.publishedAt ? new Date(story.publishedAt).toLocaleDateString('en-IN', {
     year: 'numeric', month: 'long', day: 'numeric'

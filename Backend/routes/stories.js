@@ -10,6 +10,7 @@ import {
   toggleLike
 } from '../controllers/storyController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
+import Story from '../models/Story.js';
 
 const router = express.Router();
 
@@ -64,5 +65,38 @@ router.delete('/writer/stories/:id', [
   protect,
   authorize('writer')
 ], deleteStory);
+
+// Add this route to your story routes file
+router.post('/:id/view', async (req, res) => {
+  try {
+    const story = await Story.findById(req.params.id);
+    if (!story) {
+      return res.status(404).json({
+        success: false,
+        message: 'Story not found'
+      });
+    }
+
+    // Increment views by 1
+    story.views += 1;
+    await story.save();
+
+    res.json({
+      success: true,
+      message: 'View count updated',
+      story: {
+        _id: story._id,
+        views: story.views
+      }
+    });
+
+  } catch (error) {
+    console.error('Increment view error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while updating view count'
+    });
+  }
+});
 
 export default router;
