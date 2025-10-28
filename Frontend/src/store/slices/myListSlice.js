@@ -41,20 +41,7 @@ export const toggleStoryInList = createAsyncThunk(
         return rejectWithValue(data.message || 'Failed to update your list');
       }
       
-      // Store in localStorage for persistence
-      if (data.added) {
-        const currentList = JSON.parse(localStorage.getItem('myList') || '[]');
-        if (!currentList.includes(storyId)) {
-          currentList.push(storyId);
-          localStorage.setItem('myList', JSON.stringify(currentList));
-        }
-      } else {
-        const currentList = JSON.parse(localStorage.getItem('myList') || '[]');
-        const updatedList = currentList.filter(id => id !== storyId);
-        localStorage.setItem('myList', JSON.stringify(updatedList));
-      }
-      
-      return { storyId, added: data.added, message: data.message };
+      return { storyId, added: data.added, message: data.message, story: data.story };
     } catch (error) {
       return rejectWithValue(error.message || 'Network error');
     }
@@ -66,7 +53,8 @@ const myListSlice = createSlice({
   initialState: {
     stories: [], 
     loading: false, 
-    error: null, 
+    error: null,
+    listStatus: {}, // Track individual story list status
   },
 
   reducers: {
@@ -74,24 +62,27 @@ const myListSlice = createSlice({
       state.stories = [];
       state.loading = false;
       state.error = null;
-      localStorage.removeItem('myList');
+      state.listStatus = {};
     },
-    initializeMyList: (state, action) => {
-      // Initialize from localStorage if available
-      const storedList = JSON.parse(localStorage.getItem('myList') || '[]');
-      state.stories = state.stories.filter(story => 
-        storedList.includes(story._id)
-      );
+    // New reducer to update list status in real-time
+    updateListStatus: (state, action) => {
+      const { storyId, isInList } = action.payload;
+      state.listStatus[storyId] = isInList;
     },
-    removeStoryFromList: (state, action) => {
+    // Add story to my list immediately
+    addToMyList: (state, action) => {
+      const story = action.payload;
+      if (!state.stories.some(s => s._id === story._id)) {
+        state.stories.unshift(story);
+      }
+      state.listStatus[story._id] = true;
+    },
+    // Remove story from my list immediately
+    removeFromMyList: (state, action) => {
       const storyId = action.payload;
-      state.stories = state.stories.filter(story => story?._id !== storyId);
-      
-      // Update localStorage
-      const currentList = JSON.parse(localStorage.getItem('myList') || '[]');
-      const updatedList = currentList.filter(id => id !== storyId);
-      localStorage.setItem('myList', JSON.stringify(updatedList));
-    }
+      state.stories = state.stories.filter(story => story._id !== storyId);
+      state.listStatus[storyId] = false;
+    },
   },
 
   extraReducers: (builder) => {
@@ -107,28 +98,45 @@ const myListSlice = createSlice({
           likes: story.likes || [],
         }));
         
-        // Sync with localStorage
-        const myListIds = action.payload.map(story => story._id);
-        localStorage.setItem('myList', JSON.stringify(myListIds));
+        // Initialize list status for all stories in my list
+        action.payload.forEach(story => {
+          state.listStatus[story._id] = true;
+        });
       })
       .addCase(fetchMyList.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload; 
       })
+      .addCase(toggleStoryInList.pending, (state) => {
+        state.error = null;
+      })
       .addCase(toggleStoryInList.fulfilled, (state, action) => {
-        const { storyId, added } = action.payload;
-        if (!added) {
-          state.stories = state.stories.filter((story) => story?._id !== storyId);
+        const { storyId, added, story } = action.payload;
+        
+        // Update list status immediately
+        state.listStatus[storyId] = added;
+        
+        if (added && story) {
+          // Add to my list with proper story data
+          if (!state.stories.some(s => s._id === storyId)) {
+            state.stories.unshift({
+              ...story,
+              likes: story.likes || [],
+            });
+          }
+        } else {
+          // Remove from my list
+          state.stories = state.stories.filter(story => story._id !== storyId);
         }
-        state.error = null; 
       })
       .addCase(toggleStoryInList.rejected, (state, action) => {
         state.error = action.payload;
       })
       .addCase(toggleLike.fulfilled, (state, action) => {
         const { storyId, liked, likesCount } = action.payload; 
+        
+        // Update likes in my list stories
         const storyIndex = state.stories.findIndex(story => story?._id === storyId);
-
         if (storyIndex !== -1) {
           state.stories[storyIndex].likesCount = likesCount;
           state.stories[storyIndex].isLikedByCurrentUser = liked; 
@@ -137,6 +145,6 @@ const myListSlice = createSlice({
   },
 });
 
-export const { clearMyList, initializeMyList, removeStoryFromList } = myListSlice.actions;
+export const { clearMyList, updateListStatus, addToMyList, removeFromMyList } = myListSlice.actions;
 
 export default myListSlice.reducer;

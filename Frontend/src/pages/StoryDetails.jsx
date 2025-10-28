@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { FaHeart, FaRegHeart, FaBookmark, FaRegBookmark, FaUserCircle, FaEye, FaCalendarAlt, FaBookOpen, FaTags, FaShare, FaReadme } from 'react-icons/fa';
 
-import { fetchStoryById, clearCurrentStory, toggleLike, incrementStoryView, setViewIncremented, initializeLikeStatus } from '../store/slices/storySlice';
-import { fetchMyList, toggleStoryInList, removeStoryFromList } from '../store/slices/myListSlice';
+import { fetchStoryById, clearCurrentStory, toggleLike, incrementStoryView, markStoryAsViewed, initializeLikeStatus } from '../store/slices/storySlice';
+import { fetchMyList, toggleStoryInList, updateListStatus } from '../store/slices/myListSlice';
 import CommentList from '../components/Comment/CommentList';
 import StoryPosterCard from '../components/Story/StoryPosterCard';
 
@@ -13,24 +13,37 @@ const StoryDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const hasIncrementedView = useRef(false); // Track if view has been incremented
 
   const { user } = useSelector((state) => state.auth);
-  const { currentStory: story, loading, error, viewIncremented } = useSelector((state) => state.story);
+  const { currentStory: story, loading, error, viewedStories } = useSelector((state) => state.story);
   const { stories: allStories } = useSelector((state) => state.story);
-  const { stories: myList, loading: myListLoading } = useSelector((state) => state.myList);
+  const { stories: myList, loading: myListLoading, listStatus } = useSelector((state) => state.myList);
 
   useEffect(() => {
     if (id) {
-      // First fetch the story without incrementing view
+      // First fetch the story
       dispatch(fetchStoryById(id)).then((result) => {
         if (result.payload && result.payload.story) {
           // Initialize like status from localStorage
           dispatch(initializeLikeStatus({ storyId: id }));
           
-          // Increment view only once per session
-          if (!viewIncremented) {
-            dispatch(incrementStoryView(id));
-            dispatch(setViewIncremented(true));
+          // Increment view only once per component mount (not on refresh)
+          if (!hasIncrementedView.current) {
+            hasIncrementedView.current = true;
+            
+            // Also check if not already viewed in this session
+            if (!viewedStories.includes(id)) {
+              dispatch(incrementStoryView(id))
+                .unwrap()
+                .then(() => {
+                  // Mark as viewed to prevent duplicate increments in same session
+                  dispatch(markStoryAsViewed(id));
+                })
+                .catch((err) => {
+                  console.error('Failed to increment view:', err);
+                });
+            }
           }
         }
       });
@@ -42,6 +55,8 @@ const StoryDetails = () => {
     
     return () => {
       dispatch(clearCurrentStory());
+      // Reset the ref when component unmounts
+      hasIncrementedView.current = false;
     };
   }, [id, dispatch, user]);
 
@@ -60,16 +75,21 @@ const StoryDetails = () => {
       navigate('/login');
       return;
     }
+    
+    // Update UI immediately
+    const currentStatus = listStatus[story._id];
+    dispatch(updateListStatus({ storyId: story._id, isInList: !currentStatus }));
+    
     dispatch(toggleStoryInList(story._id))
       .unwrap()
       .then((payload) => {
         toast.success(payload.message);
-        // If removed from list, update local state immediately
-        if (!payload.added) {
-          dispatch(removeStoryFromList(story._id));
-        }
       })
-      .catch((err) => toast.error(err));
+      .catch((err) => {
+        // Revert UI if failed
+        dispatch(updateListStatus({ storyId: story._id, isInList: currentStatus }));
+        toast.error(err);
+      });
   };
 
   const handleShare = () => {
@@ -142,8 +162,9 @@ const StoryDetails = () => {
 
   // Check like status from both Redux state and localStorage for persistence
   const isLiked = story.isLikedByCurrentUser === true || localStorage.getItem(`liked_${story._id}`) === 'true';
-  const isSaved = myList.some((savedStory) => savedStory?._id === story._id) || 
-                 JSON.parse(localStorage.getItem('myList') || '[]').includes(story._id);
+  
+  // Check my list status from Redux state (real-time)
+  const isSaved = listStatus[story._id] === true;
 
   const publishedDate = story.publishedAt ? new Date(story.publishedAt).toLocaleDateString('en-IN', {
     year: 'numeric', month: 'long', day: 'numeric'

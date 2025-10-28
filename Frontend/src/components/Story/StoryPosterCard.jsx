@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleLike } from '../../store/slices/storySlice'; // Adjust path
-import { toggleStoryInList } from '../../store/slices/myListSlice'; // Adjust path
+import { toggleStoryInList, updateListStatus } from '../../store/slices/myListSlice'; // Adjust path
 import { FaHeart, FaRegHeart, FaBookmark, FaRegBookmark, FaEye } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
@@ -11,15 +11,18 @@ const StoryPosterCard = ({ story }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
-  const { stories: myList } = useSelector((state) => state.myList);
+  const { stories: myList, listStatus } = useSelector((state) => state.myList);
 
   if (!story) {
     console.warn("StoryPosterCard received undefined story prop");
     return null;
   }
 
-  const isLiked = story.isLikedByCurrentUser === true;
-  const isSaved = myList.some((savedStory) => savedStory?._id === story._id);
+  // Check like status from both Redux state and localStorage for persistence
+  const isLiked = story.isLikedByCurrentUser === true || localStorage.getItem(`liked_${story._id}`) === 'true';
+  
+  // Check my list status from Redux state (real-time)
+  const isSaved = listStatus[story._id] === true;
 
   const handleLikeClick = (e) => {
     e.preventDefault();
@@ -40,10 +43,21 @@ const StoryPosterCard = ({ story }) => {
       navigate('/login');
       return;
     }
+    
+    // Update UI immediately
+    const currentStatus = listStatus[story._id];
+    dispatch(updateListStatus({ storyId: story._id, isInList: !currentStatus }));
+    
     dispatch(toggleStoryInList(story._id))
       .unwrap()
-      .then((payload) => toast.success(payload.message))
-      .catch((err) => toast.error(err));
+      .then((payload) => {
+        toast.success(payload.message);
+      })
+      .catch((err) => {
+        // Revert UI if failed
+        dispatch(updateListStatus({ storyId: story._id, isInList: currentStatus }));
+        toast.error(err);
+      });
   };
 
   const title = story.title || 'Untitled Story';
@@ -86,7 +100,9 @@ const StoryPosterCard = ({ story }) => {
               {/* Save Icon with Tooltip */}
               <button
                 onClick={handleSaveClick}
-                className="!text-white !text-xl hover:!text-yellow-400 !transition-colors !duration-200 !p-1.5 !bg-black/40 hover:!bg-black/60 !rounded-full focus:!outline-none cursor-pointer"
+                className={`!text-xl hover:!text-yellow-400 !transition-colors !duration-200 !p-1.5 !bg-black/40 hover:!bg-black/60 !rounded-full focus:!outline-none cursor-pointer ${
+                  isSaved ? '!text-yellow-400' : '!text-white'
+                }`}
                 aria-label={isSaved ? 'Remove from My List' : 'Save to My List'}
                 title={isSaved ? 'Remove from My List' : 'Save to My List'}
               >
@@ -95,7 +111,9 @@ const StoryPosterCard = ({ story }) => {
               {/* Like Icon with Tooltip */}
               <button
                 onClick={handleLikeClick}
-                className={`!text-xl hover:!text-purple-400 !transition-colors !duration-200 !p-1.5 !bg-black/40 hover:!bg-black/60 !rounded-full focus:!outline-none cursor-pointer ${isLiked ? '!text-purple-500' : '!text-white'}`}
+                className={`!text-xl hover:!text-purple-400 !transition-colors !duration-200 !p-1.5 !bg-black/40 hover:!bg-black/60 !rounded-full focus:!outline-none cursor-pointer ${
+                  isLiked ? '!text-purple-500' : '!text-white'
+                }`}
                 aria-label={isLiked ? 'Unlike Story' : 'Like Story'}
                 title={isLiked ? 'Unlike Story' : 'Like Story'}
               >

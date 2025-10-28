@@ -66,7 +66,6 @@ router.delete('/writer/stories/:id', [
   authorize('writer')
 ], deleteStory);
 
-// Add this route to your story routes file
 router.post('/:id/view', async (req, res) => {
   try {
     const story = await Story.findById(req.params.id);
@@ -77,7 +76,7 @@ router.post('/:id/view', async (req, res) => {
       });
     }
 
-    // Increment views by 1
+    // Simple increment by 1
     story.views += 1;
     await story.save();
 

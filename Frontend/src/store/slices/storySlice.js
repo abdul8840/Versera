@@ -30,9 +30,7 @@ export const fetchStoryById = createAsyncThunk(
   'story/fetchStoryById',
   async (storyId, { rejectWithValue }) => {
     try {
-      // Remove token for public story access to prevent view increment on refresh
       const response = await fetch(`${API_BASE_URL}/api/stories/${storyId}`);
-
       const data = await response.json();
 
       if (!response.ok) {
@@ -148,7 +146,7 @@ export const deleteStory = createAsyncThunk(
 
 export const toggleLike = createAsyncThunk(
   'story/toggleLike',
-  async (storyId, { rejectWithValue, getState }) => {
+  async (storyId, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE_URL}/api/stories/${storyId}/like`, {
@@ -206,7 +204,7 @@ const storySlice = createSlice({
     loading: false,
     error: null,
     success: false,
-    viewIncremented: false, // Track if view has been incremented for current story
+    viewedStories: [], // Use array to track viewed stories in current session
     pagination: {
       currentPage: 1,
       totalPages: 1,
@@ -224,12 +222,13 @@ const storySlice = createSlice({
     },
     clearCurrentStory: (state) => {
       state.currentStory = null;
-      state.viewIncremented = false;
     },
-    setViewIncremented: (state, action) => {
-      state.viewIncremented = action.payload;
+    markStoryAsViewed: (state, action) => {
+      const storyId = action.payload;
+      if (!state.viewedStories.includes(storyId)) {
+        state.viewedStories.push(storyId);
+      }
     },
-    // New reducer to check and set like status from localStorage
     initializeLikeStatus: (state, action) => {
       const { storyId } = action.payload;
       const isLiked = localStorage.getItem(`liked_${storyId}`) === 'true';
@@ -242,6 +241,10 @@ const storySlice = createSlice({
       if (storyIndex !== -1) {
         state.stories[storyIndex].isLikedByCurrentUser = isLiked;
       }
+    },
+    // Clear viewed stories when user leaves the app or logs out
+    clearViewedStories: (state) => {
+      state.viewedStories = [];
     },
   },
   extraReducers: (builder) => {
@@ -281,9 +284,17 @@ const storySlice = createSlice({
       })
       // Increment Story View
       .addCase(incrementStoryView.fulfilled, (state, action) => {
-        state.viewIncremented = true;
-        if (state.currentStory && state.currentStory._id === action.payload.story._id) {
-          state.currentStory.views = action.payload.story.views;
+        const { story } = action.payload;
+        
+        // Update current story views
+        if (state.currentStory && state.currentStory._id === story._id) {
+          state.currentStory.views = story.views;
+        }
+        
+        // Update in stories list
+        const storyIndex = state.stories.findIndex(s => s._id === story._id);
+        if (storyIndex !== -1) {
+          state.stories[storyIndex].views = story.views;
         }
       })
       // Create Story
@@ -370,5 +381,5 @@ const storySlice = createSlice({
   },
 });
 
-export const { clearError, clearSuccess, clearCurrentStory, setViewIncremented, initializeLikeStatus } = storySlice.actions;
+export const { clearError, clearSuccess, clearCurrentStory, markStoryAsViewed, initializeLikeStatus, clearViewedStories } = storySlice.actions;
 export default storySlice.reducer;

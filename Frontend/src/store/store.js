@@ -8,6 +8,10 @@ import commentReducer from './slices/commentSlice';
 import myListReducer from './slices/myListSlice';
 import dashboardReducer from './slices/dashboardSlice';
 
+import { enableMapSet } from 'immer';
+
+enableMapSet();
+
 export const store = configureStore({
   reducer: {
     auth: authReducer,
