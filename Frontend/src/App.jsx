@@ -33,6 +33,7 @@ import Header from './components/Layout/Header';
 import AllStories from './pages/AllStories';
 import StoryDetails from './pages/StoryDetails';
 import MyListPage from './pages/MyListPage';
+import CategoryDetails from './pages/CategoryDetails';
 
 function AppContent() {
   return (
@@ -46,6 +47,7 @@ function AppContent() {
 
         <Route path="/stories" element={<AllStories />} />
         <Route path="/stories/:id" element={<StoryDetails />} />
+        <Route path="/category/:categoryId" element={<CategoryDetails />} />
 
         <Route path="/register" element={
           <PublicRoute>

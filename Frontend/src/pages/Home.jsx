@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import HeroSection from '../components/HomeContent/HeroSection';
+import CategoriesSection from '../components/Category/CategoriesSection';
 
 const Home = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
@@ -9,6 +10,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <HeroSection />
+      <CategoriesSection />
       {/* Hero Section */}
       <section className="py-20">
         <div className="max-w-7xl !mx-auto !px-4 sm:!px-6 lg:!px-8 text-center">
