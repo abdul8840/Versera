@@ -41,7 +41,8 @@ const menuItems = [
   { text: 'Stories', icon: <BookIcon />, path: '/admin/stories' },
   { text: 'Categories', icon: <CategoryIcon />, path: '/admin/categories' },
   { text: 'Target Audience', icon: <AudienceIcon />, path: '/admin/target-audience' }, 
-  { text: 'Admin Profile', icon: <AdminUsersIcon />, path: '/admin/admin-profile' }, 
+  { text: 'Admin Profile', icon: <AdminUsersIcon />, path: '/admin/admin-profile' },
+  { text: 'All Comments', icon: <AdminUsersIcon />, path: '/admin/all-comment' }, 
 ];
 
 const AdminLayout = ({ children }) => {
