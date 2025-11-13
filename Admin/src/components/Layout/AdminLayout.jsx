@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CommentIcon from '@mui/icons-material/Comment';
 import {
   Box,
   Drawer,
@@ -42,7 +43,7 @@ const menuItems = [
   { text: 'Categories', icon: <CategoryIcon />, path: '/admin/categories' },
   { text: 'Target Audience', icon: <AudienceIcon />, path: '/admin/target-audience' }, 
   { text: 'Admin Profile', icon: <AdminUsersIcon />, path: '/admin/admin-profile' },
-  { text: 'All Comments', icon: <AdminUsersIcon />, path: '/admin/all-comment' }, 
+  { text: 'All Comments', icon: <CommentIcon />, path: '/admin/all-comment' }, 
 ];
 
 const AdminLayout = ({ children }) => {

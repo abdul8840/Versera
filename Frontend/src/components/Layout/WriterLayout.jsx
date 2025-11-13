@@ -27,6 +27,7 @@ const WriterLayout = ({ children }) => {
     { name: 'Create Story', path: '/writer/stories/create', icon: '➕' },
     { name: 'Analytics', path: '/writer/analytics', icon: '📈' }, // Note: This route isn't in App.jsx yet
     { name: 'Profile', path: '/writer/profile', icon: '👤' },
+    { name: 'Followers', path: '/writer/followers', icon: '👥' },
     { name: 'My List', path: '/my-list', icon: '❤️' }, // Added My List page
   ];
 

@@ -34,6 +34,8 @@ import AllStories from './pages/AllStories';
 import StoryDetails from './pages/StoryDetails';
 import MyListPage from './pages/MyListPage';
 import CategoryDetails from './pages/CategoryDetails';
+import Analytics from './pages/Analytics';
+import Followers from './pages/writer/Followers';
 
 function AppContent() {
   return (
@@ -128,6 +130,17 @@ function AppContent() {
         <Route path="/writer/profile" element={
           <ProtectedRoute requiredRole="writer">
             <WriterProfile />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/writer/analytics" element={
+          <ProtectedRoute requiredRole="writer">
+            <Analytics />
+          </ProtectedRoute>
+        } />
+        <Route path="/writer/followers" element={
+          <ProtectedRoute requiredRole="writer">
+            <Followers />
           </ProtectedRoute>
         } />
 
